@@ -42,7 +42,10 @@ Our top sponsors are shown below! [[Become a Sponsor](https://github.com/sponsor
             </td>
             <td align="center">
                 <a href="https://getstream.io/chat/flutter/tutorial/?utm_source=https://github.com/felangel/bloc&utm_medium=github&utm_content=developer&utm_term=flutter" target="_blank"><img width="250px" src="https://stream-blog.s3.amazonaws.com/blog/wp-content/uploads/fc148f0fc75d02841d017bb36e14e388/Stream-logo-with-background-.png"/></a><br/><span><a href="https://getstream.io/chat/flutter/tutorial/?utm_source=https://github.com/felangel/bloc&utm_medium=github&utm_content=developer&utm_term=flutter" target="_blank">Try the Flutter Chat Tutorial &nbsp💬</a></span>
-            </td>            
+            </td>
+            <td align="center">
+                <a href="https://www.miquido.com/flutter-development-company/?utm_source=github&utm_medium=sponsorship&utm_campaign=bloc-silver-tier&utm_term=flutter-development-company&utm_content=miquido-logo"><img src="https://raw.githubusercontent.com/felangel/bloc/master/docs/assets/miquido_logo.png" width="225"/></a>
+            </td>
         </tr>
     </tbody>
 </table>
@@ -51,7 +54,7 @@ Our top sponsors are shown below! [[Become a Sponsor](https://github.com/sponsor
 
 ## Usage
 
-Lets take a look at how to use `BlocBuilder` to hook up a `CounterPage` widget to a `CounterCubit`.
+Lets take a look at how to use `BlocProvider` to provide a `CounterCubit` to a `CounterPage` and react to state changes with `BlocBuilder`.
 
 ### counter_cubit.dart
 
@@ -61,6 +64,24 @@ class CounterCubit extends Cubit<int> {
 
   void increment() => emit(state + 1);
   void decrement() => emit(state - 1);
+}
+```
+
+### main.dart
+
+```dart
+void main() => runApp(CounterApp());
+
+class CounterApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: BlocProvider(
+        create: (_) => CounterCubit(),
+        child: CounterPage(),
+      ),
+    );
+  }
 }
 ```
 
@@ -79,19 +100,14 @@ class CounterPage extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.end,
         mainAxisAlignment: MainAxisAlignment.end,
         children: <Widget>[
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 5.0),
-            child: FloatingActionButton(
-              child: const Icon(Icons.add),
-              onPressed: () => context.read<CounterCubit>().increment(),
-            ),
+          FloatingActionButton(
+            child: const Icon(Icons.add),
+            onPressed: () => context.read<CounterCubit>().increment(),
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 5.0),
-            child: FloatingActionButton(
-              child: const Icon(Icons.remove),
-              onPressed: () => context.read<CounterCubit>().decrement(),
-            ),
+          const SizedBox(height: 4),
+          FloatingActionButton(
+            child: const Icon(Icons.remove),
+            onPressed: () => context.read<CounterCubit>().decrement(),
           ),
         ],
       ),
@@ -100,7 +116,7 @@ class CounterPage extends StatelessWidget {
 }
 ```
 
-At this point we have successfully separated our presentational layer from our business logic layer. Notice that the `CounterPage` widget knows nothing about what happens when a user taps the buttons. The widget simply tells the `CounterCubit` that the user has pressed either the increment or decrement button.
+At this point we have successfully separated our presentational layer from our business logic layer. Notice that the `CounterPage` widget knows nothing about what happens when a user taps the buttons. The widget simply notifies the `CounterCubit` that the user has pressed either the increment or decrement button.
 
 ## Bloc Widgets
 
@@ -142,6 +158,23 @@ BlocBuilder<BlocA, BlocAState>(
   builder: (context, state) {
     // return widget here based on BlocA's state
   }
+)
+```
+
+### BlocSelector
+
+**BlocSelector** is a Flutter widget which is analogous to `BlocBuilder` but allows developers to filter updates by selecting a new value based on the current bloc state. Unnecessary builds are prevented if the selected value does not change. The selected value must be immutable in order for `BlocSelector` to accurately determine whether `builder` should be called again.
+
+If the `bloc` parameter is omitted, `BlocSelector` will automatically perform a lookup using `BlocProvider` and the current `BuildContext`.
+
+```dart
+BlocSelector<BlocA, BlocAState, SelectedState>(
+  selector: (state) {
+    // return selected state based on the provided state.
+  },
+  builder: (context, state) {
+    // return widget here based on the selected state.
+  },
 )
 ```
 
@@ -205,7 +238,7 @@ In addition, `context.select` can be used to retrieve part of a state and react 
 final isPositive = context.select((CounterBloc b) => b.state >= 0);
 ```
 
-The snippet above will only rebuild if the state of the `CounterBloc` changes from positive to negative or vice versa.
+The snippet above will only rebuild if the state of the `CounterBloc` changes from positive to negative or vice versa and is functionally identical to using a `BlocSelector`.
 
 ### MultiBlocProvider
 

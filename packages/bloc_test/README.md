@@ -36,7 +36,10 @@ Our top sponsors are shown below! [[Become a Sponsor](https://github.com/sponsor
             </td>
             <td align="center">
                 <a href="https://getstream.io/chat/flutter/tutorial/?utm_source=https://github.com/felangel/bloc&utm_medium=github&utm_content=developer&utm_term=flutter" target="_blank"><img width="250px" src="https://stream-blog.s3.amazonaws.com/blog/wp-content/uploads/fc148f0fc75d02841d017bb36e14e388/Stream-logo-with-background-.png"/></a><br/><span><a href="https://getstream.io/chat/flutter/tutorial/?utm_source=https://github.com/felangel/bloc&utm_medium=github&utm_content=developer&utm_term=flutter" target="_blank">Try the Flutter Chat Tutorial &nbsp💬</a></span>
-            </td>            
+            </td>
+            <td align="center">
+                <a href="https://www.miquido.com/flutter-development-company/?utm_source=github&utm_medium=sponsorship&utm_campaign=bloc-silver-tier&utm_term=flutter-development-company&utm_content=miquido-logo"><img src="https://raw.githubusercontent.com/felangel/bloc/master/docs/assets/miquido_logo.png" width="225"/></a>
+            </td>
         </tr>
     </tbody>
 </table>
@@ -82,7 +85,9 @@ expect(counterBloc.state, equals(3));
 **blocTest** creates a new `bloc`-specific test case with the given `description`.
 `blocTest` will handle asserting that the `bloc` emits the `expect`ed states (in order) after `act` is executed. `blocTest` also handles ensuring that no additional states are emitted by closing the `bloc` stream before evaluating the `expect`ation.
 
-`build` should be used for all `bloc` initialization and preparation and must return the `bloc` under test.
+`setUp` is optional and should be used to set up any dependencies prior to initializing the `bloc` under test. `setUp` should be used to set up state necessary for a particular test case. For common set up code, prefer to use `setUp` from `package:test/test.dart`.
+
+`build` should construct and return the `bloc` under test.
 
 `seed` is an optional `Function` that returns a state which will be used to seed the `bloc` before `act` is called.
 
@@ -98,6 +103,10 @@ expect(counterBloc.state, equals(3));
 
 `errors` is an optional `Function` that returns a `Matcher` which the `bloc` under test is expected to throw after `act` is executed.
 
+`tearDown` is optional and can be used to execute any code after the test has run. `tearDown` should be used to clean up after a particular test case. For common tear down code, prefer to use `tearDown` from `package:test/test.dart`.
+
+`tags` is optional and if it is passed, it declares user-defined tags that are applied to the test. These tags can be used to select or skip the test on the command line, or to do bulk test configuration.
+
 ```dart
 group('CounterBloc', () {
   blocTest(
@@ -107,9 +116,9 @@ group('CounterBloc', () {
   );
 
   blocTest(
-    'emits [1] when CounterEvent.increment is added',
+    'emits [1] when CounterIncrementPressed is added',
     build: () => CounterBloc(),
-    act: (bloc) => bloc.add(CounterEvent.increment),
+    act: (bloc) => bloc.add(CounterIncrementPressed()),
     expect: () => [1],
   );
 });
@@ -119,10 +128,10 @@ group('CounterBloc', () {
 
 ```dart
 blocTest(
-  'CounterCubit emits [10] when seeded with 9',
-  build: () => CounterCubit(),
+  'emits [10] when seeded with 9',
+  build: () => CounterBloc(),
   seed: () => 9,
-  act: (cubit) => cubit.increment(),
+  act: (bloc) => bloc.add(CounterIncrementPressed()),
   expect: () => [10],
 );
 ```
@@ -131,9 +140,9 @@ blocTest(
 
 ```dart
 blocTest(
-  'CounterBloc emits [2] when CounterEvent.increment is added twice',
+  'emits [2] when CounterIncrementPressed is added twice',
   build: () => CounterBloc(),
-  act: (bloc) => bloc..add(CounterEvent.increment)..add(CounterEvent.increment),
+  act: (bloc) => bloc..add(CounterIncrementPressed())..add(CounterIncrementPressed()),
   skip: 1,
   expect: () => [2],
 );
@@ -143,11 +152,11 @@ blocTest(
 
 ```dart
 blocTest(
-  'CounterBloc emits [1] when CounterEvent.increment is added',
-  build: () => CounterBloc(),
-  act: (bloc) => bloc.add(CounterEvent.increment),
+  'emits [MyState] when MyEvent is added',
+  build: () => MyBloc(),
+  act: (bloc) => bloc.add(MyEvent()),
   wait: const Duration(milliseconds: 300),
-  expect: () => [1],
+  expect: () => [isA<MyState>()],
 );
 ```
 
@@ -155,10 +164,10 @@ blocTest(
 
 ```dart
 blocTest(
-  'CounterBloc emits [1] when CounterEvent.increment is added',
-  build: () => CounterBloc(),
-  act: (bloc) => bloc.add(CounterEvent.increment),
-  expect: () => [1],
+  'emits [MyState] when MyEvent is added',
+  build: () => MyBloc(),
+  act: (bloc) => bloc.add(MyEvent()),
+  expect: () => [isA<MyState>()],
   verify: (_) {
     verify(() => repository.someMethod(any())).called(1);
   }
@@ -169,8 +178,8 @@ blocTest(
 
 ```dart
 blocTest(
-  'CounterBloc throws Exception when null is added',
-  build: () => CounterBloc(),
+  'throws Exception when null is added',
+  build: () => MyBloc(),
   act: (bloc) => bloc.add(null),
   errors: () => [isA<Exception>()]
 );
@@ -180,10 +189,10 @@ blocTest(
 
 ```dart
 blocTest(
-  'emits [StateB] when MyEvent is added',
+  'emits [MyState] when MyEvent is added',
   build: () => MyBloc(),
   act: (bloc) => bloc.add(MyEvent()),
-  expect: () => [isA<StateB>()],
+  expect: () => [isA<MyState>()],
 );
 ```
 

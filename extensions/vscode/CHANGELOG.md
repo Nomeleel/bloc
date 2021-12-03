@@ -1,3 +1,51 @@
+# 6.2.0
+
+- feat: query latest package versions from pub.dev
+
+# 6.1.0
+
+- feat: update to latest packages
+  - bloc -> ^7.2.1
+  - flutter_bloc -> ^7.3.3
+  - bloc_test -> ^8.5.0
+- fix:(vscode): escape $ in "wrap with" and "convert to"
+
+# 6.0.1
+
+- chore: remove unnecessary abstract keyword from freezed template
+
+# 6.0.0
+
+- **BREAKING**: update to bloc ^7.2.0
+  - update snippets to use `on<Event>` instead of deprecated `mapEventToState`
+- feat: add `onevent` snippet to register a new `EventHandler`
+- feat: update to latest packages
+  - bloc -> ^7.2.0
+  - flutter_bloc -> ^7.3.0
+  - angular_bloc -> ^7.1.0
+  - bloc_test -> ^8.2.0
+  - replay_bloc -> ^0.1.0
+  - bloc_concurrency -> ^0.1.0
+  - sealed_flutter_bloc -> ^7.1.0
+
+# 5.8.0
+
+- feat: add "Convert to..." Multi-Widget Actions
+  - `Convert to MultiBlocListener`
+  - `Convert to MultiBlocProvider`
+  - `Convert to MultiRepositoryProvider`
+
+# 5.7.0
+
+- feat: add snippets for `BlocSelector`
+- feat: add `Wrap with BlocSelector` action
+- feat: update to latest packages
+  - bloc_test -> ^8.1.0
+  - equatable -> ^2.0.3
+  - flutter_bloc -> ^7.1.0
+  - hydrated_bloc -> ^7.0.1
+  - sealed_flutter_bloc -> ^7.0.0
+
 # 5.6.2
 
 - fix: "Wrap with..." selection issues

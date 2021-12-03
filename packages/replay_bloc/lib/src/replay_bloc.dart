@@ -29,18 +29,12 @@ class _Undo extends ReplayEvent {
 /// A custom [ReplayBloc] can be created by extending [ReplayBloc].
 ///
 /// ```dart
-/// enum CounterEvent { increment }
+/// abstract class CounterEvent {}
+/// class CounterIncrementPressed extends CounterEvent {}
 ///
 /// class CounterBloc extends ReplayBloc<CounterEvent, int> {
-///   CounterBloc() : super(0);
-///
-///   @override
-///   Stream<int> mapEventToState(CounterEvent event) async* {
-///     switch (event) {
-///       case CounterEvent.increment:
-///         yield state + 1;
-///         break;
-///     }
+///   CounterBloc() : super(0) {
+///     on<CounterIncrementPressed>((event, emit) => emit(state + 1));
 ///   }
 /// }
 /// ```
@@ -50,7 +44,7 @@ class _Undo extends ReplayEvent {
 /// ```dart
 /// final bloc = CounterBloc();
 ///
-/// bloc.add(CounterEvent.increment);
+/// bloc.add(CounterIncrementPressed());
 ///
 /// bloc.undo();
 ///
@@ -77,6 +71,7 @@ abstract class ReplayBloc<Event extends ReplayEvent, State>
 /// A mixin which enables `undo` and `redo` operations
 /// for [Bloc] classes.
 mixin ReplayBlocMixin<Event extends ReplayEvent, State> on Bloc<Event, State> {
+  late final _blocObserver = BlocOverrides.current?.blocObserver;
   late final _changeStack = _ChangeStack<State>(shouldReplay: shouldReplay);
 
   /// Sets the internal `undo`/`redo` size limit.
@@ -84,20 +79,17 @@ mixin ReplayBlocMixin<Event extends ReplayEvent, State> on Bloc<Event, State> {
   set limit(int limit) => _changeStack.limit = limit;
 
   @override
-  Stream<State> mapEventToState(covariant Event event);
-
-  @override
   // ignore: must_call_super
   void onTransition(covariant Transition<ReplayEvent, State> transition) {
     // ignore: invalid_use_of_protected_member
-    Bloc.observer.onTransition(this, transition);
+    _blocObserver?.onTransition(this, transition);
   }
 
   @override
   // ignore: must_call_super
   void onEvent(covariant ReplayEvent event) {
     // ignore: invalid_use_of_protected_member
-    Bloc.observer.onEvent(this, event);
+    _blocObserver?.onEvent(this, event);
   }
 
   @override

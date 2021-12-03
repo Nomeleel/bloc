@@ -1,4 +1,3 @@
-import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -128,7 +127,7 @@ class MyCounterAppState extends State<MyCounterApp> {
 }
 
 class CounterCubit extends Cubit<int> {
-  CounterCubit() : super(0);
+  CounterCubit({int seed = 0}) : super(seed);
 
   void increment() => emit(state + 1);
   void decrement() => emit(state - 1);
@@ -425,7 +424,10 @@ void main() {
         ),
       );
       await tester.pump();
-      counterCubit..increment()..increment()..increment();
+      counterCubit
+        ..increment()
+        ..increment()
+        ..increment();
       await tester.pumpAndSettle();
 
       expect(states, [0, 2]);
@@ -459,7 +461,10 @@ void main() {
         ),
       );
       await tester.pump();
-      counterCubit..increment()..increment()..increment();
+      counterCubit
+        ..increment()
+        ..increment()
+        ..increment();
       await tester.pumpAndSettle();
       expect(states, [0, 2]);
 
@@ -470,7 +475,7 @@ void main() {
 
     testWidgets('rebuilds when provided bloc is changed', (tester) async {
       final firstCounterCubit = CounterCubit();
-      final secondCounterCubit = CounterCubit()..emit(100);
+      final secondCounterCubit = CounterCubit(seed: 100);
 
       await tester.pumpWidget(
         Directionality(

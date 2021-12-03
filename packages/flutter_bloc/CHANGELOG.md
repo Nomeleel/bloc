@@ -1,3 +1,47 @@
+# 8.0.0
+
+- **BREAKING**: feat: upgrade to `bloc v8.0.0`
+
+# 8.0.0-dev.3
+
+- **BREAKING**: feat: upgrade to `bloc v8.0.0-dev.5`
+
+# 8.0.0-dev.2
+
+- **BREAKING**: feat: upgrade to `bloc v8.0.0-dev.3`
+
+# 8.0.0-dev.1
+
+- **BREAKING**: feat: upgrade to `bloc v8.0.0-dev.2`
+
+# 7.3.3
+
+- fix: add missing child assertion to `BlocListener` and `BlocProvider` ([#2924](https://github.com/felangel/bloc/pull/2924))
+
+# 7.3.2
+
+- fix: `BlocProvider` explicitly default `lazy` to `true` to support `avoid_redundant_argument_values` ([#2917](https://github.com/felangel/bloc/pull/2917))
+
+# 7.3.1
+
+- fix: determine bloc reference changes via `identical`
+  - Previously `identityHashCode` was used to determine if the bloc reference had changed to trigger a rebuild ([#2482](https://github.com/felangel/bloc/pull/2482)) however, it's possible for different bloc references to have the same `hashCode` as a result of hash collisions. The fix uses `identical` to determine whether the bloc reference has changed.
+- docs: add inline docs to library
+- docs: minor improvements to example and `README`
+- chore: remove unneeded imports
+
+# 7.3.0
+
+- feat: upgrade to `bloc: ^7.2.0`
+
+# 7.2.0
+
+- feat: upgrade to `provider: ^6.0.0`
+
+# 7.1.0
+
+- feat: add `BlocSelector` widget
+
 # 7.0.1
 
 - fix: `BlocConsumer`, `BlocBuilder`, and `BlocListener` depend on bloc/cubit instance

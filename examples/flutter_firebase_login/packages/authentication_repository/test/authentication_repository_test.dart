@@ -2,6 +2,7 @@
 import 'package:authentication_repository/authentication_repository.dart';
 import 'package:cache/cache.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
+import 'package:firebase_auth_platform_interface/firebase_auth_platform_interface.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_core_platform_interface/firebase_core_platform_interface.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -37,6 +38,8 @@ class MockGoogleSignInAuthentication extends Mock
 class MockUserCredential extends Mock implements firebase_auth.UserCredential {}
 
 class FakeAuthCredential extends Fake implements firebase_auth.AuthCredential {}
+
+class FakeAuthProvider extends Fake implements AuthProvider {}
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -76,8 +79,6 @@ void main() {
   const user = User(
     id: _mockFirebaseUserUid,
     email: _mockFirebaseUserEmail,
-    name: null,
-    photo: null,
   );
 
   group('AuthenticationRepository', () {
@@ -87,7 +88,8 @@ void main() {
     late AuthenticationRepository authenticationRepository;
 
     setUpAll(() {
-      registerFallbackValue<firebase_auth.AuthCredential>(FakeAuthCredential());
+      registerFallbackValue(FakeAuthCredential());
+      registerFallbackValue(FakeAuthProvider());
     });
 
     setUp(() {
@@ -132,8 +134,9 @@ void main() {
         );
       });
 
-      test('throws SignUpFailure when createUserWithEmailAndPassword throws',
-          () async {
+      test(
+          'throws SignUpWithEmailAndPasswordFailure '
+          'when createUserWithEmailAndPassword throws', () async {
         when(
           () => firebaseAuth.createUserWithEmailAndPassword(
             email: any(named: 'email'),
@@ -142,7 +145,7 @@ void main() {
         ).thenThrow(Exception());
         expect(
           authenticationRepository.signUp(email: email, password: password),
-          throwsA(isA<SignUpFailure>()),
+          throwsA(isA<SignUpWithEmailAndPasswordFailure>()),
         );
       });
     });
@@ -163,12 +166,44 @@ void main() {
             .thenAnswer((_) async => googleSignInAccount);
         when(() => firebaseAuth.signInWithCredential(any()))
             .thenAnswer((_) => Future.value(MockUserCredential()));
+        when(() => firebaseAuth.signInWithPopup(any()))
+            .thenAnswer((_) => Future.value(MockUserCredential()));
       });
 
       test('calls signIn authentication, and signInWithCredential', () async {
         await authenticationRepository.logInWithGoogle();
         verify(() => googleSignIn.signIn()).called(1);
         verify(() => firebaseAuth.signInWithCredential(any())).called(1);
+      });
+
+      test(
+          'throws LogInWithGoogleFailure and calls signIn authentication, and '
+          'signInWithPopup when authCredential is null and kIsWeb is true',
+          () async {
+        authenticationRepository.isWeb = true;
+        await expectLater(
+          () => authenticationRepository.logInWithGoogle(),
+          throwsA(isA<LogInWithGoogleFailure>()),
+        );
+        verifyNever(() => googleSignIn.signIn());
+        verify(() => firebaseAuth.signInWithPopup(any())).called(1);
+      });
+
+      test(
+          'sucessfully calls signIn authentication, and '
+          'signInWithPopup when authCredential is not null and kIsWeb is true',
+          () async {
+        final credential = MockUserCredential();
+        when(() => firebaseAuth.signInWithPopup(any()))
+            .thenAnswer((_) async => credential);
+        when(() => credential.credential).thenReturn(FakeAuthCredential());
+        authenticationRepository.isWeb = true;
+        await expectLater(
+          authenticationRepository.logInWithGoogle(),
+          completes,
+        );
+        verifyNever(() => googleSignIn.signIn());
+        verify(() => firebaseAuth.signInWithPopup(any())).called(1);
       });
 
       test('succeeds when signIn succeeds', () {

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
+import 'package:diff_match_patch/diff_match_patch.dart';
 import 'package:meta/meta.dart';
 import 'package:test/test.dart' as test;
 
@@ -10,8 +11,12 @@ import 'package:test/test.dart' as test;
 /// [blocTest] also handles ensuring that no additional states are emitted
 /// by closing the `bloc` stream before evaluating the [expect]ation.
 ///
-/// [build] should be used for all `bloc` initialization and preparation
-/// and must return the `bloc` under test.
+/// [setUp] is optional and should be used to set up
+/// any dependencies prior to initializing the `bloc` under test.
+/// [setUp] should be used to set up state necessary for a particular test case.
+/// For common set up code, prefer to use `setUp` from `package:test/test.dart`.
+///
+/// [build] should construct and return the `bloc` under test.
 ///
 /// [seed] is an optional `Function` that returns a state
 /// which will be used to seed the `bloc` before [act] is called.
@@ -34,6 +39,15 @@ import 'package:test/test.dart' as test;
 ///
 /// [errors] is an optional `Function` that returns a `Matcher` which the `bloc`
 /// under test is expected to throw after [act] is executed.
+///
+/// [tearDown] is optional and can be used to
+/// execute any code after the test has run.
+/// [tearDown] should be used to clean up after a particular test case.
+/// For common tear down code, prefer to use `tearDown` from `package:test/test.dart`.
+///
+/// [tags] is optional and if it is passed, it declares user-defined tags
+/// that are applied to the test. These tags can be used to select or
+/// skip the test on the command line, or to do bulk test configuration.
 ///
 /// ```dart
 /// blocTest(
@@ -113,9 +127,18 @@ import 'package:test/test.dart' as test;
 ///  expect: () => [isA<StateB>()],
 /// );
 /// ```
+///
+/// If [tags] is passed, it declares user-defined tags that are applied to the
+/// test. These tags can be used to select or skip the test on the command line,
+/// or to do bulk test configuration. All tags should be declared in the
+/// [package configuration file][configuring tags]. The parameter can be an
+/// [Iterable] of tag names, or a [String] representing a single tag.
+///
+/// [configuring tags]: https://github.com/dart-lang/test/blob/master/pkgs/test/doc/configuration.md#configuring-tags
 @isTest
 void blocTest<B extends BlocBase<State>, State>(
   String description, {
+  FutureOr<void> Function()? setUp,
   required B Function() build,
   State Function()? seed,
   Function(B bloc)? act,
@@ -124,25 +147,34 @@ void blocTest<B extends BlocBase<State>, State>(
   dynamic Function()? expect,
   Function(B bloc)? verify,
   dynamic Function()? errors,
+  FutureOr<void> Function()? tearDown,
+  dynamic tags,
 }) {
-  test.test(description, () async {
-    await testBloc<B, State>(
-      build: build,
-      seed: seed,
-      act: act,
-      wait: wait,
-      skip: skip,
-      expect: expect,
-      verify: verify,
-      errors: errors,
-    );
-  });
+  test.test(
+    description,
+    () async {
+      await testBloc<B, State>(
+        setUp: setUp,
+        build: build,
+        seed: seed,
+        act: act,
+        wait: wait,
+        skip: skip,
+        expect: expect,
+        verify: verify,
+        errors: errors,
+        tearDown: tearDown,
+      );
+    },
+    tags: tags,
+  );
 }
 
 /// Internal [blocTest] runner which is only visible for testing.
 /// This should never be used directly -- please use [blocTest] instead.
 @visibleForTesting
 Future<void> testBloc<B extends BlocBase<State>, State>({
+  FutureOr<void> Function()? setUp,
   required B Function() build,
   State Function()? seed,
   Function(B bloc)? act,
@@ -151,49 +183,112 @@ Future<void> testBloc<B extends BlocBase<State>, State>({
   dynamic Function()? expect,
   Function(B bloc)? verify,
   dynamic Function()? errors,
+  FutureOr<void> Function()? tearDown,
 }) async {
-  final unhandledErrors = <Object>[];
   var shallowEquality = false;
-  await runZonedGuarded(
+  final unhandledErrors = <Object>[];
+  await BlocOverrides.runZoned(
     () async {
-      final states = <State>[];
-      final bloc = build();
-      // ignore: invalid_use_of_visible_for_testing_member, invalid_use_of_protected_member
-      if (seed != null) bloc.emit(seed());
-      final subscription = bloc.stream.skip(skip).listen(states.add);
-      try {
-        await act?.call(bloc);
-      } catch (error) {
-        unhandledErrors.add(
-          error is BlocUnhandledErrorException ? error.error : error,
-        );
-      }
-      if (wait != null) await Future<void>.delayed(wait);
-      await Future<void>.delayed(Duration.zero);
-      await bloc.close();
-      if (expect != null) {
-        final dynamic expected = expect();
-        shallowEquality = '$states' == '$expected';
-        test.expect(states, test.wrapMatcher(expected));
-      }
-      await subscription.cancel();
-      await verify?.call(bloc);
-    },
-    (Object error, _) {
-      if (error is BlocUnhandledErrorException) {
-        unhandledErrors.add(error.error);
-      } else if (shallowEquality && error is test.TestFailure) {
-        // ignore: only_throw_errors
-        throw test.TestFailure(
-          '''${error.message}
+      await runZonedGuarded(
+        () async {
+          await setUp?.call();
+          final states = <State>[];
+          final bloc = build();
+          // ignore: invalid_use_of_protected_member, invalid_use_of_visible_for_testing_member
+          if (seed != null) bloc.emit(seed());
+          final subscription = bloc.stream.skip(skip).listen(states.add);
+          try {
+            await act?.call(bloc);
+          } catch (error) {
+            unhandledErrors.add(error);
+          }
+          if (wait != null) await Future<void>.delayed(wait);
+          await Future<void>.delayed(Duration.zero);
+          await bloc.close();
+          if (expect != null) {
+            final dynamic expected = expect();
+            shallowEquality = '$states' == '$expected';
+            try {
+              test.expect(states, test.wrapMatcher(expected));
+            } on test.TestFailure catch (e) {
+              if (shallowEquality || expected is! List<State>) rethrow;
+              final diff = _diff(expected: expected, actual: states);
+              final message = '${e.message}\n$diff';
+              // ignore: only_throw_errors
+              throw test.TestFailure(message);
+            }
+          }
+          await subscription.cancel();
+          await verify?.call(bloc);
+          await tearDown?.call();
+        },
+        (Object error, _) {
+          if (shallowEquality && error is test.TestFailure) {
+            // ignore: only_throw_errors
+            throw test.TestFailure(
+              '''${error.message}
 WARNING: Please ensure state instances extend Equatable, override == and hashCode, or implement Comparable.
 Alternatively, consider using Matchers in the expect of the blocTest rather than concrete state instances.\n''',
-        );
-      } else {
-        // ignore: only_throw_errors
-        throw error;
-      }
+            );
+          }
+          if (!unhandledErrors.contains(error)) {
+            // ignore: only_throw_errors
+            throw error;
+          }
+        },
+      );
     },
+    blocObserver: _TestBlocObserver(unhandledErrors.add),
   );
   if (errors != null) test.expect(unhandledErrors, test.wrapMatcher(errors()));
+}
+
+class _TestBlocObserver extends BlocObserver {
+  _TestBlocObserver(this._onError);
+
+  final _localObserver = BlocOverrides.current?.blocObserver;
+  final void Function(Object error) _onError;
+
+  @override
+  void onError(BlocBase bloc, Object error, StackTrace stackTrace) {
+    _localObserver?.onError(bloc, error, stackTrace);
+    _onError(error);
+    super.onError(bloc, error, stackTrace);
+  }
+}
+
+String _diff({required dynamic expected, required dynamic actual}) {
+  final buffer = StringBuffer();
+  final differences = diff(expected.toString(), actual.toString());
+  buffer
+    ..writeln('${"=" * 4} diff ${"=" * 40}')
+    ..writeln('')
+    ..writeln(differences.toPrettyString())
+    ..writeln('')
+    ..writeln('${"=" * 4} end diff ${"=" * 36}');
+  return buffer.toString();
+}
+
+extension on List<Diff> {
+  String toPrettyString() {
+    String identical(String str) => '\u001b[90m$str\u001B[0m';
+    String deletion(String str) => '\u001b[31m[-$str-]\u001B[0m';
+    String insertion(String str) => '\u001b[32m{+$str+}\u001B[0m';
+
+    final buffer = StringBuffer();
+    for (final difference in this) {
+      switch (difference.operation) {
+        case DIFF_EQUAL:
+          buffer.write(identical(difference.text));
+          break;
+        case DIFF_DELETE:
+          buffer.write(deletion(difference.text));
+          break;
+        case DIFF_INSERT:
+          buffer.write(insertion(difference.text));
+          break;
+      }
+    }
+    return buffer.toString();
+  }
 }

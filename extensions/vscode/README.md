@@ -40,13 +40,17 @@ You can activate the commands by launching the command palette (View -> Command 
 
 ## Code Actions
 
-| Action                         | Description                                    |
-| ------------------------------ | ---------------------------------------------- |
-| `Wrap with BlocBuilder`        | Wraps current widget in a `BlocBuilder`        |
-| `Wrap with BlocListener`       | Wraps current widget in a `BlocListener`       |
-| `Wrap with BlocConsumer`       | Wraps current widget in a `BlocConsumer`       |
-| `Wrap with BlocProvider`       | Wraps current widget in a `BlocProvider`       |
-| `Wrap with RepositoryProvider` | Wraps current widget in a `RepositoryProvider` |
+| Action                               | Description                                                            |
+| ------------------------------------ | ---------------------------------------------------------------------- |
+| `Convert to MultiBlocListener`       | Converts current `BlocListener` into a `MultiBlocListener`             |
+| `Convert to MultiBlocProvider`       | Converts current `BlocProvider` into a `MultiBlocProvider`             |
+| `Convert to MultiRepositoryProvider` | Converts current `RepositoryProvider` into a `MultiRepositoryProvider` |
+| `Wrap with BlocBuilder`              | Wraps current widget in a `BlocBuilder`                                |
+| `Wrap with BlocSelector`             | Wraps current widget in a `BlocSelector`                               |
+| `Wrap with BlocListener`             | Wraps current widget in a `BlocListener`                               |
+| `Wrap with BlocConsumer`             | Wraps current widget in a `BlocConsumer`                               |
+| `Wrap with BlocProvider`             | Wraps current widget in a `BlocProvider`                               |
+| `Wrap with RepositoryProvider`       | Wraps current widget in a `RepositoryProvider`                         |
 
 ![demo](https://raw.githubusercontent.com/felangel/bloc/master/extensions/vscode/assets/wrap-with-usage.gif)
 
@@ -61,12 +65,14 @@ You can activate the commands by launching the command palette (View -> Command 
 | `importbloctest`    | Imports `package:bloc_test`                |
 | `bloc`              | Creates a bloc class                       |
 | `cubit`             | Creates a cubit class                      |
+| `onevent`           | Register a new `EventHandler`              |
 | `blocobserver`      | Creates a `BlocObserver` class             |
 | `blocprovider`      | Creates a `BlocProvider` widget            |
 | `multiblocprovider` | Creates a `MultiBlocProvider` widget       |
 | `repoprovider`      | Creates a `RepositoryProvider` widget      |
 | `multirepoprovider` | Creates a `MultiRepositoryProvider` widget |
 | `blocbuilder`       | Creates a `BlocBuilder` widget             |
+| `blocselector`      | Creates a `BlocSelector` widget            |
 | `bloclistener`      | Creates a `BlocListener` widget            |
 | `multibloclistener` | Creates a `MultiBlocListener` widget       |
 | `blocconsumer`      | Creates a `BlocConsumer` widget            |
@@ -81,9 +87,9 @@ You can activate the commands by launching the command palette (View -> Command 
 
 ### Freezed Bloc
 
-| Shortcut     | Description                                                     |
-| ------------ | --------------------------------------------------------------- |
-| `feventwhen` | Creates a map event to state function with freeze.when function |
-| `feventmap`  | Creates a map event to state function with freeze.map function  |
-| `fstate`     | Creates a sub state                                             |
-| `fevent`     | Creates a sub event                                             |
+| Shortcut     | Description                                        |
+| ------------ | -------------------------------------------------- |
+| `feventwhen` | Creates an event handler with freeze.when function |
+| `feventmap`  | Creates an event handler with freeze.map function  |
+| `fstate`     | Creates a sub state                                |
+| `fevent`     | Creates a sub event                                |

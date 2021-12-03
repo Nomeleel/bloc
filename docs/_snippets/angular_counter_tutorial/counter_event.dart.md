@@ -1,3 +1,5 @@
 ```dart
-enum CounterEvent { increment, decrement }
+abstract class CounterEvent {}
+class CounterIncrementPressed extends CounterEvent {}
+class CounterDecrementPressed extends CounterEvent {}
 ```

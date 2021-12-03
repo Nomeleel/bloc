@@ -4,7 +4,7 @@
 
 <p align="center">
   <a href="https://github.com/felangel/bloc/actions"><img src="https://github.com/felangel/bloc/workflows/build/badge.svg" alt="build"></a>
-  <a href="https://codecov.io/gh/felangel/bloc"><img src="https://codecov.io/gh/felangel/Bloc/branch/master/graph/badge.svg" alt="codecov"></a>
+  <a href="https://codecov.io/gh/felangel/bloc"><img src="https://codecov.io/gh/felangel/bloc/branch/master/graph/badge.svg" alt="codecov"></a>
   <a href="https://github.com/felangel/bloc"><img src="https://img.shields.io/github/stars/felangel/bloc.svg?style=flat&logo=github&colorB=deeppink&label=stars" alt="Star on Github"></a>
   <a href="https://github.com/tenhobi/effective_dart"><img src="https://img.shields.io/badge/style-effective_dart-40c4ff.svg" alt="style: effective dart"></a>
   <a href="https://flutter.dev/docs/development/data-and-backend/state-mgmt/options#bloc--rx"><img src="https://img.shields.io/badge/flutter-website-deepskyblue.svg" alt="Flutter Website"></a>
@@ -33,7 +33,10 @@ Our top sponsors are shown below! [[Become a Sponsor](https://github.com/sponsor
             </td>
             <td align="center">
                 <a href="https://getstream.io/chat/flutter/tutorial/?utm_source=https://github.com/felangel/bloc&utm_medium=github&utm_content=developer&utm_term=flutter" target="_blank"><img width="250px" src="https://stream-blog.s3.amazonaws.com/blog/wp-content/uploads/fc148f0fc75d02841d017bb36e14e388/Stream-logo-with-background-.png"/></a><br/><span><a href="https://getstream.io/chat/flutter/tutorial/?utm_source=https://github.com/felangel/bloc&utm_medium=github&utm_content=developer&utm_term=flutter" target="_blank">Try the Flutter Chat Tutorial &nbsp💬</a></span>
-            </td>            
+            </td>
+            <td align="center">
+                <a href="https://www.miquido.com/flutter-development-company/?utm_source=github&utm_medium=sponsorship&utm_campaign=bloc-silver-tier&utm_term=flutter-development-company&utm_content=miquido-logo"><img src="https://raw.githubusercontent.com/felangel/bloc/master/docs/assets/miquido_logo.png" width="225"/></a>
+            </td>
         </tr>
     </tbody>
 </table>
@@ -44,7 +47,7 @@ Our top sponsors are shown below! [[Become a Sponsor](https://github.com/sponsor
 
 `hydrated_bloc` exports a `Storage` interface which means it can work with any storage provider. Out of the box, it comes with its own implementation: `HydratedStorage`.
 
-`HydratedStorage` is built on top of [hive](https://pub.dev/packages/hive) for a platform-agnostic, performant storage layer. See the complete [example](example) for more details.
+`HydratedStorage` is built on top of [hive](https://pub.dev/packages/hive) for a platform-agnostic, performant storage layer. See the complete [example](https://github.com/felangel/bloc/blob/master/packages/hydrated_bloc/example) for more details.
 
 ## Usage
 
@@ -52,11 +55,11 @@ Our top sponsors are shown below! [[Become a Sponsor](https://github.com/sponsor
 
 ```dart
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  HydratedBloc.storage = await HydratedStorage.build(
-    storageDirectory: await getTemporaryDirectory(),
+  final storage = await HydratedStorage.build(storageDirectory: ...);
+  HydratedBlocOverrides.runZoned(
+    () => runApp(App()),
+    storage: storage,
   );
-  runApp(App());
 }
 ```
 
@@ -79,18 +82,12 @@ class CounterCubit extends HydratedCubit<int> {
 ### Create a HydratedBloc
 
 ```dart
-enum CounterEvent { increment }
+abstract class CounterEvent {}
+class CounterIncrementPressed extends CounterEvent {}
 
 class CounterBloc extends HydratedBloc<CounterEvent, int> {
-  CounterBloc() : super(0);
-
-  @override
-  Stream<int> mapEventToState(CounterEvent event) async* {
-    switch (event) {
-      case CounterEvent.increment:
-        yield state + 1;
-        break;
-    }
+  CounterBloc() : super(0) {
+    on<CounterIncrementPressed>((event, emit) => emit(state + 1));
   }
 
   @override
@@ -126,7 +123,7 @@ class CounterCubit extends Cubit<int> with HydratedMixin {
 Any `storageDirectory` can be used when creating an instance of `HydratedStorage`:
 
 ```dart
-HydratedBloc.storage = await HydratedStorage.build(
+final storage = await HydratedStorage.build(
   storageDirectory: await getApplicationDocumentsDirectory(),
 );
 ```
@@ -164,7 +161,10 @@ class MyHydratedStorage implements Storage {
 ```dart
 // main.dart
 
-HydratedBloc.storage = MyHydratedStorage();
+HydratedBlocOverrides.runZoned(
+  () => runApp(MyApp()),
+  storage: MyHydratedStorage(),
+);
 ```
 
 ## Dart Versions

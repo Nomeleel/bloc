@@ -1,4 +1,4 @@
-<img src="https://raw.githubusercontent.com/felangel/bloc/master/docs/assets/bloc_logo_full.png" height="100" alt="Bloc" /><br/><small>v7.0.0</small>
+<img src="https://raw.githubusercontent.com/felangel/bloc/master/docs/assets/bloc_logo_full.png" height="100" alt="Bloc" /><br/><small>v8.0.0</small>
 
 [![build](https://github.com/felangel/bloc/workflows/build/badge.svg)](https://github.com/felangel/bloc/actions)
 [![codecov](https://codecov.io/gh/felangel/Bloc/branch/master/graph/badge.svg)](https://codecov.io/gh/felangel/bloc)
@@ -10,11 +10,28 @@
 [![Discord](https://img.shields.io/discord/649708778631200778.svg?logo=discord&color=blue)](https://discord.gg/bloc)
 [![License: MIT](https://img.shields.io/badge/license-MIT-purple.svg)](https://opensource.org/licenses/MIT)
 
-> uma biblioteca previsível de gerenciamento de estado para o Dart.
+> uma biblioteca previsível de gerenciamento de estado para Dart.
 
 - Simples e leve
 - Altamente testável
 - Para Dart, Flutter e AngularDart
 
-[GitHub](https://github.com/felangel/bloc/)
-[Iniciar](pt-br/gettingstarted.md)
+<p class="buttons">
+    <a href="#/pt-br/migration">Guia de Migração</a>
+    <a href="https://github.com/felangel/bloc/" target="_blank" rel="noopener">GitHub</a>
+    <a href="#/pt-br/gettingstarted">Iniciar</a>
+</p>
+
+<p align="center" style="margin-top: 2em; margin-bottom: 1em"><b>Sponsored with 💖 by</b></p>
+
+<div id="cover-sponsors-grid">
+    <div>
+        <a href="https://verygood.ventures"><img src="https://raw.githubusercontent.com/felangel/bloc/master/docs/assets/vgv_logo_transparent.png" width="65"/></a>
+    </div>
+    <div>
+        <a href="https://getstream.io/chat/flutter/tutorial/?utm_source=https://github.com/felangel/bloc&utm_medium=github&utm_content=developer&utm_term=flutter" target="_blank"><img width="120" src="https://stream-blog-v2.imgix.net/blog/wp-content/uploads/bae8c920a484d1c49dbd148306aa1335/stream-bloc-flutter.png?auto=compress&fit=clip&w=120"/></a><br/><span><a href="https://getstream.io/chat/flutter/tutorial/?utm_source=https://github.com/felangel/bloc&utm_medium=github&utm_content=developer&utm_term=flutter" target="_blank">Try the Flutter Chat Tutorial &nbsp💬</a></span>
+    </div>
+    <div>
+        <a href="https://www.miquido.com/flutter-development-company/?utm_source=github&utm_medium=sponsorship&utm_campaign=bloc-silver-tier&utm_term=flutter-development-company&utm_content=miquido-logo"><img src="https://raw.githubusercontent.com/felangel/bloc/master/docs/assets/miquido_logo_transparent.png" width="225"/></a>
+    </div>
+</div>

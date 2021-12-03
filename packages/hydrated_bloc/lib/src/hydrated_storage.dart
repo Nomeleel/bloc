@@ -1,11 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:hive/hive.dart';
-import 'package:meta/meta.dart';
-import 'package:synchronized/synchronized.dart';
 // ignore: implementation_imports
 import 'package:hive/src/hive_impl.dart';
+import 'package:meta/meta.dart';
+import 'package:synchronized/synchronized.dart';
 
 import 'hydrated_cipher.dart';
 
@@ -57,12 +58,15 @@ class HydratedStorage implements Storage {
   ///
   /// void main() async {
   ///   WidgetsFlutterBinding.ensureInitialized();
-  ///   HydratedBloc.storage = await HydratedStorage.build(
+  ///   final storage = await HydratedStorage.build(
   ///     storageDirectory: kIsWeb
-  ///      ? HydratedStorage.webStorageDirectory
-  ///      : await getTemporaryDirectory(),
+  ///       ? HydratedStorage.webStorageDirectory
+  ///       : await getTemporaryDirectory(),
   ///   );
-  ///   runApp(App());
+  ///   HydratedBlocOverrides.runZoned(
+  ///     () => runApp(App()),
+  ///     storage: storage,
+  ///   );
   /// }
   /// ```
   ///

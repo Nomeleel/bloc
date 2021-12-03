@@ -19,14 +19,16 @@
 
 A predictable state management library that helps implement the [BLoC design pattern](https://www.didierboelens.com/2018/08/reactive-programming---streams---bloc).
 
-| Package                                                                              | Pub                                                                                                      |
-| ------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------- |
-| [bloc](https://github.com/felangel/bloc/tree/master/packages/bloc)                   | [![pub package](https://img.shields.io/pub/v/bloc.svg)](https://pub.dev/packages/bloc)                   |
-| [bloc_test](https://github.com/felangel/bloc/tree/master/packages/bloc_test)         | [![pub package](https://img.shields.io/pub/v/bloc_test.svg)](https://pub.dev/packages/bloc_test)         |
-| [flutter_bloc](https://github.com/felangel/bloc/tree/master/packages/flutter_bloc)   | [![pub package](https://img.shields.io/pub/v/flutter_bloc.svg)](https://pub.dev/packages/flutter_bloc)   |
-| [angular_bloc](https://github.com/felangel/bloc/tree/master/packages/angular_bloc)   | [![pub package](https://img.shields.io/pub/v/angular_bloc.svg)](https://pub.dev/packages/angular_bloc)   |
-| [hydrated_bloc](https://github.com/felangel/bloc/tree/master/packages/hydrated_bloc) | [![pub package](https://img.shields.io/pub/v/hydrated_bloc.svg)](https://pub.dev/packages/hydrated_bloc) |
-| [replay_bloc](https://github.com/felangel/bloc/tree/master/packages/replay_bloc)     | [![pub package](https://img.shields.io/pub/v/replay_bloc.svg)](https://pub.dev/packages/replay_bloc)     |
+| Package                                                                                    | Pub                                                                                                                  |
+| ------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------- |
+| [bloc](https://github.com/felangel/bloc/tree/master/packages/bloc)                         | [![pub package](https://img.shields.io/pub/v/bloc.svg)](https://pub.dev/packages/bloc)                               |
+| [bloc_test](https://github.com/felangel/bloc/tree/master/packages/bloc_test)               | [![pub package](https://img.shields.io/pub/v/bloc_test.svg)](https://pub.dev/packages/bloc_test)                     |
+| [bloc_concurrency](https://github.com/felangel/bloc/tree/master/packages/bloc_concurrency) | [![pub package](https://img.shields.io/pub/v/bloc_concurrency.svg)](https://pub.dev/packages/bloc_concurrency)       |
+| [flutter_bloc](https://github.com/felangel/bloc/tree/master/packages/flutter_bloc)         | [![pub package](https://img.shields.io/pub/v/flutter_bloc.svg)](https://pub.dev/packages/flutter_bloc)               |
+| [angular_bloc](https://github.com/felangel/bloc/tree/master/packages/angular_bloc)         | [![pub package](https://img.shields.io/pub/v/angular_bloc.svg)](https://pub.dev/packages/angular_bloc)               |
+| [hydrated_bloc](https://github.com/felangel/bloc/tree/master/packages/hydrated_bloc)       | [![pub package](https://img.shields.io/pub/v/hydrated_bloc.svg)](https://pub.dev/packages/hydrated_bloc)             |
+| [replay_bloc](https://github.com/felangel/bloc/tree/master/packages/replay_bloc)           | [![pub package](https://img.shields.io/pub/v/replay_bloc.svg)](https://pub.dev/packages/replay_bloc)                 |
+| [sealed_flutter_bloc](https://github.com/felangel/sealed_flutter_bloc)                     | [![pub package](https://img.shields.io/pub/v/sealed_flutter_bloc.svg)](https://pub.dev/packages/sealed_flutter_bloc) |
 
 ---
 
@@ -42,7 +44,10 @@ Our top sponsors are shown below! [[Become a Sponsor](https://github.com/sponsor
             </td>
             <td align="center">
                 <a href="https://getstream.io/chat/flutter/tutorial/?utm_source=https://github.com/felangel/bloc&utm_medium=github&utm_content=developer&utm_term=flutter" target="_blank"><img width="250px" src="https://stream-blog.s3.amazonaws.com/blog/wp-content/uploads/fc148f0fc75d02841d017bb36e14e388/Stream-logo-with-background-.png"/></a><br/><span><a href="https://getstream.io/chat/flutter/tutorial/?utm_source=https://github.com/felangel/bloc&utm_medium=github&utm_content=developer&utm_term=flutter" target="_blank">Try the Flutter Chat Tutorial &nbsp💬</a></span>
-            </td>            
+            </td>
+            <td align="center">
+                <a href="https://www.miquido.com/flutter-development-company/?utm_source=github&utm_medium=sponsorship&utm_campaign=bloc-silver-tier&utm_term=flutter-development-company&utm_content=miquido-logo"><img src="https://raw.githubusercontent.com/felangel/bloc/master/docs/assets/miquido_logo.png" width="225"/></a>
+            </td>
         </tr>
     </tbody>
 </table>
@@ -58,11 +63,14 @@ The goal of this library is to make it easy to separate _presentation_ from _bus
 ## Documentation
 
 - [Official Documentation](https://bloclibrary.dev)
-- [Bloc Package](https://github.com/felangel/Bloc/tree/master/packages/bloc/README.md)
-- [Flutter Bloc Package](https://github.com/felangel/Bloc/tree/master/packages/flutter_bloc/README.md)
-- [Angular Bloc Package](https://github.com/felangel/Bloc/tree/master/packages/angular_bloc/README.md)
-- [Hydrated Bloc Package](https://github.com/felangel/Bloc/tree/master/packages/hydrated_bloc/README.md)
-- [Replay Bloc Package](https://github.com/felangel/Bloc/tree/master/packages/replay_bloc/README.md)
+- [Bloc Package](https://github.com/felangel/bloc/tree/master/packages/bloc/README.md)
+- [Bloc Test Package](https://github.com/felangel/bloc/tree/master/packages/bloc_test/README.md)
+- [Bloc Concurrency Package](https://github.com/felangel/bloc/tree/master/packages/bloc_concurrency/README.md)
+- [Flutter Bloc Package](https://github.com/felangel/bloc/tree/master/packages/flutter_bloc/README.md)
+- [Angular Bloc Package](https://github.com/felangel/bloc/tree/master/packages/angular_bloc/README.md)
+- [Hydrated Bloc Package](https://github.com/felangel/bloc/tree/master/packages/hydrated_bloc/README.md)
+- [Replay Bloc Package](https://github.com/felangel/bloc/tree/master/packages/replay_bloc/README.md)
+- [Sealed Flutter Bloc Package](https://github.com/felangel/sealed_flutter_bloc/blob/master/README.md)
 
 ## Migration
 
@@ -111,7 +119,7 @@ The goal of this library is to make it easy to separate _presentation_ from _bus
 
 ### Dart
 
-- [Counter](https://github.com/felangel/Bloc/tree/master/packages/bloc/example) - an example of how to create a `CounterBloc` (pure dart).
+- [Counter](https://github.com/felangel/bloc/tree/master/packages/bloc/example) - an example of how to create a `CounterBloc` (pure dart).
 
 ### Flutter
 

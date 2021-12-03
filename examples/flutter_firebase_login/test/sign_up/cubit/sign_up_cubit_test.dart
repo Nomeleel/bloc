@@ -1,9 +1,9 @@
 // ignore_for_file: prefer_const_constructors
 import 'package:authentication_repository/authentication_repository.dart';
 import 'package:bloc_test/bloc_test.dart';
-import 'package:form_inputs/form_inputs.dart';
 import 'package:flutter_firebase_login/sign_up/sign_up.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:form_inputs/form_inputs.dart';
 import 'package:formz/formz.dart';
 import 'package:mocktail/mocktail.dart';
 
@@ -90,7 +90,6 @@ void main() {
           SignUpState(
             confirmedPassword: ConfirmedPassword.dirty(
               password: invalidPasswordString,
-              value: '',
             ),
             password: invalidPassword,
             status: FormzStatus.invalid,
@@ -129,7 +128,6 @@ void main() {
         expect: () => const <SignUpState>[
           SignUpState(
             email: validEmail,
-            password: Password.pure(),
             confirmedPassword: validConfirmedPassword,
             status: FormzStatus.invalid,
           ),
@@ -147,8 +145,9 @@ void main() {
       blocTest<SignUpCubit, SignUpState>(
         'emits [invalid] when email/password/confirmedPassword are invalid',
         build: () => SignUpCubit(authenticationRepository),
-        act: (cubit) =>
-            cubit.confirmedPasswordChanged(invalidConfirmedPasswordString),
+        act: (cubit) {
+          cubit.confirmedPasswordChanged(invalidConfirmedPasswordString);
+        },
         expect: () => const <SignUpState>[
           SignUpState(
             confirmedPassword: invalidConfirmedPassword,
@@ -178,9 +177,7 @@ void main() {
         'emits [valid] when passwordChanged is called first and then '
         'confirmedPasswordChanged is called',
         build: () => SignUpCubit(authenticationRepository),
-        seed: () => SignUpState(
-          email: validEmail,
-        ),
+        seed: () => SignUpState(email: validEmail),
         act: (cubit) => cubit
           ..passwordChanged(validPasswordString)
           ..confirmedPasswordChanged(validConfirmedPasswordString),
@@ -261,15 +258,15 @@ void main() {
       blocTest<SignUpCubit, SignUpState>(
         'emits [submissionInProgress, submissionFailure] '
         'when signUp fails',
-        build: () {
+        setUp: () {
           when(
             () => authenticationRepository.signUp(
               email: any(named: 'email'),
               password: any(named: 'password'),
             ),
           ).thenThrow(Exception('oops'));
-          return SignUpCubit(authenticationRepository);
         },
+        build: () => SignUpCubit(authenticationRepository),
         seed: () => SignUpState(
           status: FormzStatus.valid,
           email: validEmail,

@@ -1,3 +1,29 @@
+# 8.0.0
+
+- **BREAKING**: feat: upgrade to `bloc v8.0.0`
+
+# 8.0.0-dev.3
+
+- **BREAKING**: feat: upgrade to `bloc v8.0.0-dev.5`
+
+# 8.0.0-dev.2
+
+- **BREAKING**: feat: upgrade to `bloc v8.0.0-dev.3`
+
+# 8.0.0-dev.1
+
+- **BREAKING**: feat: upgrade to `bloc v8.0.0-dev.2`
+
+# 7.1.0
+
+- feat: upgrade to `bloc ^7.2.0`
+
+# 7.0.0
+
+- **BREAKING**: refactor: upgrade to `angular ^7.0.0`
+- **BREAKING**: refactor: upgrade to `bloc ^7.0.0`
+- **BREAKING**: refactor upgrade to null safety (`dart >= 2.12.0`)
+
 # 6.0.1
 
 - Fix CHANGELOG formatting

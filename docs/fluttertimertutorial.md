@@ -103,7 +103,7 @@ Next, we need to define the dependency on our `Ticker`.
 
 We are also defining a `StreamSubscription` for our `Ticker` which we will get to in a bit.
 
-At this point, all that’s left to do is implement `mapEventToState`. For improved readability, I like to break out each event handler into its own helper function. We’ll start with the `TimerStarted` event.
+At this point, all that’s left to do is implement the event handlers. For improved readability, I like to break out each event handler into its own helper function. We’ll start with the `TimerStarted` event.
 
 [timer_bloc.dart](_snippets/flutter_timer_tutorial/timer_bloc_start.dart.md ':include')
 
@@ -119,7 +119,7 @@ Now let’s implement the `TimerPaused` event handler.
 
 [timer_bloc.dart](_snippets/flutter_timer_tutorial/timer_bloc_pause.dart.md ':include')
 
-In `_mapTimerPausedToState` if the `state` of our `TimerBloc` is `TimerRunInProgress`, then we can pause the `_tickerSubscription` and push a `TimerRunPause` state with the current timer duration.
+In `_onPaused` if the `state` of our `TimerBloc` is `TimerRunInProgress`, then we can pause the `_tickerSubscription` and push a `TimerRunPause` state with the current timer duration.
 
 Next, let’s implement the `TimerResumed` event handler so that we can unpause the timer.
 

@@ -1,7 +1,5 @@
-import 'package:bloc/bloc.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:provider/provider.dart';
 
 /// {@template bloc_consumer}
 /// [BlocConsumer] exposes a [builder] and [listener] in order react to new
@@ -127,7 +125,11 @@ class _BlocConsumerState<B extends BlocBase<S>, S>
 
   @override
   Widget build(BuildContext context) {
-    if (widget.bloc == null) context.select<B, int>(identityHashCode);
+    if (widget.bloc == null) {
+      // Trigger a rebuild if the bloc reference has changed.
+      // See https://github.com/felangel/bloc/issues/2127.
+      context.select<B, bool>((bloc) => identical(_bloc, bloc));
+    }
     return BlocBuilder<B, S>(
       bloc: _bloc,
       builder: widget.builder,

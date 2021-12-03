@@ -1,3 +1,126 @@
+# 8.0.1
+
+- fix: allow `emit` usage within tests ([#2982](https://github.com/felangel/bloc/pull/2982))
+
+# 8.0.0
+
+- **BREAKING**: feat: introduce `BlocOverrides` API ([#2932](https://github.com/felangel/bloc/pull/2932))
+  - `Bloc.observer` removed in favor of `BlocOverrides.runZoned` and `BlocOverrides.current.blocObserver`
+  - `Bloc.transformer` removed in favor of `BlocOverrides.runZoned` and `BlocOverrides.current.eventTransformer`
+- **BREAKING**: refactor: make `BlocObserver` an abstract class
+- **BREAKING**: feat: `add` throws `StateError` when bloc is closed ([#2912](https://github.com/felangel/bloc/pull/2912))
+- **BREAKING**: feat: `emit` throws `StateError` when bloc is closed ([#2913](https://github.com/felangel/bloc/pull/2913))
+- **BREAKING**: feat: improve error handling/reporting
+  - `BlocUnhandledErrorException` is removed
+  - Uncaught exceptions are always reported to `onError` and rethrown
+  - `addError` reports error to `onError` but does not propagate as an uncaught exception
+- **BREAKING**: feat: restrict scope of `emit` in `Bloc` and `Cubit`
+  - In `Cubit`, `emit` is `protected` so it can only be used within the `Cubit` instance.
+  - In `Bloc`, `emit` is `internal` so it cannot be used outside of the internal package implementation.
+- **BREAKING**: refactor: remove deprecated `TransitionFunction`
+- **BREAKING**: refactor: remove deprecated `transformEvents`
+- **BREAKING**: refactor: remove deprecated `mapEventToState`
+- **BREAKING**: refactor: remove deprecated `transformTransitions`
+- **BREAKING**: refactor: remove deprecated `listen` on `BlocBase`
+- feat: throw `StateError` if an event is added without a registered event handler
+
+# 8.0.0-dev.5
+
+- **BREAKING**: feat: introduce `BlocOverrides` API ([#2932](https://github.com/felangel/bloc/pull/2932))
+  - `Bloc.observer` removed in favor of `BlocOverrides.runZoned` and `BlocOverrides.current.blocObserver`
+  - `Bloc.transformer` removed in favor of `BlocOverrides.runZoned` and `BlocOverrides.current.eventTransformer`
+- **BREAKING**: refactor: make `BlocObserver` an abstract class
+- **BREAKING**: feat: `add` throws `StateError` when bloc is closed ([#2912](https://github.com/felangel/bloc/pull/2912))
+- **BREAKING**: feat: `emit` throws `StateError` when bloc is closed ([#2913](https://github.com/felangel/bloc/pull/2913))
+
+# 8.0.0-dev.4
+
+- **BREAKING**: feat: improve error handling/reporting
+  - `BlocUnhandledErrorException` is removed
+  - Uncaught exceptions are always reported to `onError` and rethrown
+  - `addError` reports error to `onError` but does not propagate as an uncaught exception
+
+# 8.0.0-dev.3
+
+- **BREAKING**: feat: restrict scope of `emit` in `Bloc` and `Cubit`
+  - In `Cubit`, `emit` is `protected` so it can only be used within the `Cubit` instance.
+  - In `Bloc`, `emit` is `internal` so it cannot be used outside of the internal package implementation.
+
+# 8.0.0-dev.2
+
+- **BREAKING**: refactor: remove deprecated `listen` on `BlocBase`
+
+# 8.0.0-dev.1
+
+- **BREAKING**: refactor: remove deprecated `TransitionFunction`
+- **BREAKING**: refactor: remove deprecated `transformEvents`
+- **BREAKING**: refactor: remove deprecated `mapEventToState`
+- **BREAKING**: refactor: remove deprecated `transformTransitions`
+- feat: throw `StateError` if an event is added without a registered event handler
+
+# 7.2.1
+
+- fix: `on<E extends Event>` should have an `EventTransformer<E>` instead of `EventTransformer<Event>`
+
+# 7.2.0
+
+- feat: introduce `on<Event>` API to register event handlers
+  - by default events are processed concurrently
+- feat: introduce `Bloc.transformer` API to configure the default `EventTransformer`
+- feat: introduce `Emitter<State>` to trigger state changes
+  - `call` to trigger a state change (alignment with `Cubit`)
+  - `forEach` as an analogue for `await for`
+  - `onEach` to simplify subscription management
+  - `isDone` to abort expensive async operations
+- feat: throw `StateError` if `mapEventToState` is used in conjunction with `on<Event>`
+- feat: throw `StateError` if duplicate event handlers are registered
+- feat: throw `AssertionError` when `emit` is called in a completed `EventHandler`
+- feat: throw `AssertionError` when `emit.onEach` and `emit.forEach` are unawaited
+- **DEPRECATE**: fix: `mapEventToState` deprecated in favor of `on<Event>`
+- **DEPRECATE**: fix: `transformEvents` deprecated in favor of `EventTransformer`
+  - use a built in `EventTransformer` or define your own
+- **DEPRECATE**: fix: `transformTransitions` deprecated
+  - override `Stream<State> get stream` to modify the outbound stream
+
+# 7.2.0-dev.3
+
+- **BREAKING**: refactor: require `emit.forEach` `onData` to be synchronous
+- refactor: minor internal optimizations in `on<Event>` implementation
+
+# 7.2.0-dev.2
+
+- **BREAKING**: refactor!: make `onData` callback in `emit.onEach` and `emit.forEach` named
+- **BREAKING**: feat!: rename `emit.isCanceled` to `emit.isDone` to encapsulate completion and cancelation
+- feat: introduce optional `onError` in `emit.onEach` and `emit.forEach`
+- feat: throw `AssertionError` when `emit` is called in a completed `EventHandler`
+- feat: throw `AssertionError` when `emit.onEach` and `emit.forEach` are unawaited
+- fix: `emit.onEach` and `emit.forEach` error propagation when stream emits an error
+
+# 7.2.0-dev.1
+
+- feat: introduce `on<Event>` API to register event handlers
+  - by default events are processed concurrently
+- feat: introduce `Bloc.transformer` API to configure the default `EventTransformer`
+- feat: introduce `Emitter<State>` to trigger state changes
+  - `call` to trigger a state change (alignment with `Cubit`)
+  - `forEach` as an analogue for `await for`
+  - `onEach` to simplify subscription management
+  - `isCanceled` to abort expensive async operations
+- feat: throw `StateError` if `mapEventToState` is used in conjunction with `on<Event>`
+- feat: throw `StateError` if duplicate event handlers are registered
+- **DEPRECATE**: fix: `mapEventToState` deprecated in favor of `on<Event>`
+- **DEPRECATE**: fix: `transformEvents` deprecated in favor of `EventTransformer`
+  - use a built in `EventTransformer` or define your own
+- **DEPRECATE**: fix: `transformTransitions` deprecated
+  - override `Stream<State> get stream` to modify the outbound stream
+
+# 7.1.0
+
+- feat: expose `isClosed` getter on `BlocBase`
+- refactor: simplify internal event controller initialization
+- docs: update `onChange` description in README
+- docs: update GetStream sponsorship urls
+
 # 7.0.0
 
 - **BREAKING**: refactor: `Bloc` and `Cubit` extend `BlocBase`

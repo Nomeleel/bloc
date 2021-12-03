@@ -2,10 +2,11 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:pedantic/pedantic.dart';
 import 'package:test/test.dart';
 
 import 'blocs/blocs.dart';
+
+Future<void> tick() => Future<void>.delayed(Duration.zero);
 
 class MockBlocObserver extends Mock implements BlocObserver {}
 
@@ -20,20 +21,23 @@ void main() {
       setUp(() {
         simpleBloc = SimpleBloc();
         observer = MockBlocObserver();
-        Bloc.observer = observer;
       });
 
       test('triggers onCreate on observer when instantiated', () {
-        final bloc = SimpleBloc();
-        // ignore: invalid_use_of_protected_member
-        verify(() => observer.onCreate(bloc)).called(1);
+        BlocOverrides.runZoned(() {
+          final bloc = SimpleBloc();
+          // ignore: invalid_use_of_protected_member
+          verify(() => observer.onCreate(bloc)).called(1);
+        }, blocObserver: observer);
       });
 
       test('triggers onClose on observer when closed', () async {
-        final bloc = SimpleBloc();
-        await bloc.close();
-        // ignore: invalid_use_of_protected_member
-        verify(() => observer.onClose(bloc)).called(1);
+        await BlocOverrides.runZoned(() async {
+          final bloc = SimpleBloc();
+          await bloc.close();
+          // ignore: invalid_use_of_protected_member
+          verify(() => observer.onClose(bloc)).called(1);
+        }, blocObserver: observer);
       });
 
       test('close does not emit new states over the state stream', () async {
@@ -49,71 +53,77 @@ void main() {
       });
 
       test('should map single event to correct state', () {
-        final expectedStates = ['data', emitsDone];
+        BlocOverrides.runZoned(() {
+          final expectedStates = ['data', emitsDone];
+          final simpleBloc = SimpleBloc();
 
-        expectLater(
-          simpleBloc.stream,
-          emitsInOrder(expectedStates),
-        ).then((dynamic _) {
-          verify(
-            // ignore: invalid_use_of_protected_member
-            () => observer.onTransition(
-              simpleBloc,
-              const Transition<dynamic, String>(
-                currentState: '',
-                event: 'event',
-                nextState: 'data',
+          expectLater(
+            simpleBloc.stream,
+            emitsInOrder(expectedStates),
+          ).then((dynamic _) {
+            verify(
+              // ignore: invalid_use_of_protected_member
+              () => observer.onTransition(
+                simpleBloc,
+                const Transition<dynamic, String>(
+                  currentState: '',
+                  event: 'event',
+                  nextState: 'data',
+                ),
               ),
-            ),
-          ).called(1);
-          verify(
-            // ignore: invalid_use_of_protected_member
-            () => observer.onChange(
-              simpleBloc,
-              const Change<String>(currentState: '', nextState: 'data'),
-            ),
-          ).called(1);
-          expect(simpleBloc.state, 'data');
-        });
+            ).called(1);
+            verify(
+              // ignore: invalid_use_of_protected_member
+              () => observer.onChange(
+                simpleBloc,
+                const Change<String>(currentState: '', nextState: 'data'),
+              ),
+            ).called(1);
+            expect(simpleBloc.state, 'data');
+          });
 
-        simpleBloc
-          ..add('event')
-          ..close();
+          simpleBloc
+            ..add('event')
+            ..close();
+        }, blocObserver: observer);
       });
 
       test('should map multiple events to correct states', () {
-        final expectedStates = ['data', emitsDone];
+        BlocOverrides.runZoned(() {
+          final expectedStates = ['data', emitsDone];
+          final simpleBloc = SimpleBloc();
 
-        expectLater(
-          simpleBloc.stream,
-          emitsInOrder(expectedStates),
-        ).then((dynamic _) {
-          verify(
-            // ignore: invalid_use_of_protected_member
-            () => observer.onTransition(
-              simpleBloc,
-              const Transition<dynamic, String>(
-                currentState: '',
-                event: 'event1',
-                nextState: 'data',
+          expectLater(
+            simpleBloc.stream,
+            emitsInOrder(expectedStates),
+          ).then((dynamic _) {
+            verify(
+              // ignore: invalid_use_of_protected_member
+              () => observer.onTransition(
+                simpleBloc,
+                const Transition<dynamic, String>(
+                  currentState: '',
+                  event: 'event1',
+                  nextState: 'data',
+                ),
               ),
-            ),
-          ).called(1);
-          verify(
-            // ignore: invalid_use_of_protected_member
-            () => observer.onChange(
-              simpleBloc,
-              const Change<String>(currentState: '', nextState: 'data'),
-            ),
-          ).called(1);
-          expect(simpleBloc.state, 'data');
-        });
+            ).called(1);
+            verify(
+              // ignore: invalid_use_of_protected_member
+              () => observer.onChange(
+                simpleBloc,
+                const Change<String>(currentState: '', nextState: 'data'),
+              ),
+            ).called(1);
+            expect(simpleBloc.state, 'data');
+          });
 
-        simpleBloc
-          ..add('event1')
-          ..add('event2')
-          ..add('event3')
-          ..close();
+          simpleBloc
+            ..add('event1')
+            ..add('event2')
+            ..add('event3')
+            ..close();
+        }, blocObserver: observer);
       });
 
       test('is a broadcast stream', () {
@@ -146,7 +156,6 @@ void main() {
       setUp(() {
         complexBloc = ComplexBloc();
         observer = MockBlocObserver();
-        Bloc.observer = observer;
       });
 
       test('close does not emit new states over the state stream', () async {
@@ -164,37 +173,40 @@ void main() {
       });
 
       test('should map single event to correct state', () {
-        final expectedStates = [ComplexStateB()];
+        BlocOverrides.runZoned(() {
+          final expectedStates = [ComplexStateB()];
+          final complexBloc = ComplexBloc();
 
-        expectLater(
-          complexBloc.stream,
-          emitsInOrder(expectedStates),
-        ).then((dynamic _) {
-          verify(
-            // ignore: invalid_use_of_protected_member
-            () => observer.onTransition(
-              complexBloc,
-              Transition<ComplexEvent, ComplexState>(
-                currentState: ComplexStateA(),
-                event: ComplexEventB(),
-                nextState: ComplexStateB(),
+          expectLater(
+            complexBloc.stream,
+            emitsInOrder(expectedStates),
+          ).then((dynamic _) {
+            verify(
+              // ignore: invalid_use_of_protected_member
+              () => observer.onTransition(
+                complexBloc,
+                Transition<ComplexEvent, ComplexState>(
+                  currentState: ComplexStateA(),
+                  event: ComplexEventB(),
+                  nextState: ComplexStateB(),
+                ),
               ),
-            ),
-          ).called(1);
-          verify(
-            // ignore: invalid_use_of_protected_member
-            () => observer.onChange(
-              complexBloc,
-              Change<ComplexState>(
-                currentState: ComplexStateA(),
-                nextState: ComplexStateB(),
+            ).called(1);
+            verify(
+              // ignore: invalid_use_of_protected_member
+              () => observer.onChange(
+                complexBloc,
+                Change<ComplexState>(
+                  currentState: ComplexStateA(),
+                  nextState: ComplexStateB(),
+                ),
               ),
-            ),
-          ).called(1);
-          expect(complexBloc.state, ComplexStateB());
-        });
+            ).called(1);
+            expect(complexBloc.state, ComplexStateB());
+          });
 
-        complexBloc.add(ComplexEventB());
+          complexBloc.add(ComplexEventB());
+        }, blocObserver: observer);
       });
 
       test('should map multiple events to correct states', () async {
@@ -217,7 +229,9 @@ void main() {
         await Future<void>.delayed(const Duration(milliseconds: 20));
         complexBloc.add(ComplexEventD());
         await Future<void>.delayed(const Duration(milliseconds: 200));
-        complexBloc..add(ComplexEventC())..add(ComplexEventA());
+        complexBloc
+          ..add(ComplexEventC())
+          ..add(ComplexEventA());
         await Future<void>.delayed(const Duration(milliseconds: 120));
         complexBloc.add(ComplexEventC());
       });
@@ -259,7 +273,6 @@ void main() {
           },
         );
         observer = MockBlocObserver();
-        Bloc.observer = observer;
       });
 
       test('state returns correct value initially', () {
@@ -269,116 +282,132 @@ void main() {
       });
 
       test('single Increment event updates state to 1', () {
-        final expectedStates = [1, emitsDone];
-        final expectedTransitions = [
-          '''Transition { currentState: 0, event: CounterEvent.increment, nextState: 1 }'''
-        ];
+        BlocOverrides.runZoned(() {
+          final expectedStates = [1, emitsDone];
+          final expectedTransitions = [
+            '''Transition { currentState: 0, event: CounterEvent.increment, nextState: 1 }'''
+          ];
+          final counterBloc = CounterBloc(
+            onEventCallback: events.add,
+            onTransitionCallback: (transition) {
+              transitions.add(transition.toString());
+            },
+          );
 
-        expectLater(
-          counterBloc.stream,
-          emitsInOrder(expectedStates),
-        ).then((dynamic _) {
-          expectLater(transitions, expectedTransitions);
-          verify(
-            // ignore: invalid_use_of_protected_member
-            () => observer.onTransition(
-              counterBloc,
-              const Transition<CounterEvent, int>(
-                currentState: 0,
-                event: CounterEvent.increment,
-                nextState: 1,
+          expectLater(
+            counterBloc.stream,
+            emitsInOrder(expectedStates),
+          ).then((dynamic _) {
+            expectLater(transitions, expectedTransitions);
+            verify(
+              // ignore: invalid_use_of_protected_member
+              () => observer.onTransition(
+                counterBloc,
+                const Transition<CounterEvent, int>(
+                  currentState: 0,
+                  event: CounterEvent.increment,
+                  nextState: 1,
+                ),
               ),
-            ),
-          ).called(1);
-          verify(
-            // ignore: invalid_use_of_protected_member
-            () => observer.onChange(
-              counterBloc,
-              const Change<int>(currentState: 0, nextState: 1),
-            ),
-          ).called(1);
-          expect(counterBloc.state, 1);
-        });
+            ).called(1);
+            verify(
+              // ignore: invalid_use_of_protected_member
+              () => observer.onChange(
+                counterBloc,
+                const Change<int>(currentState: 0, nextState: 1),
+              ),
+            ).called(1);
+            expect(counterBloc.state, 1);
+          });
 
-        counterBloc
-          ..add(CounterEvent.increment)
-          ..close();
+          counterBloc
+            ..add(CounterEvent.increment)
+            ..close();
+        }, blocObserver: observer);
       });
 
       test('multiple Increment event updates state to 3', () {
-        final expectedStates = [1, 2, 3, emitsDone];
-        final expectedTransitions = [
-          '''Transition { currentState: 0, event: CounterEvent.increment, nextState: 1 }''',
-          '''Transition { currentState: 1, event: CounterEvent.increment, nextState: 2 }''',
-          '''Transition { currentState: 2, event: CounterEvent.increment, nextState: 3 }''',
-        ];
+        BlocOverrides.runZoned(() {
+          final expectedStates = [1, 2, 3, emitsDone];
+          final expectedTransitions = [
+            '''Transition { currentState: 0, event: CounterEvent.increment, nextState: 1 }''',
+            '''Transition { currentState: 1, event: CounterEvent.increment, nextState: 2 }''',
+            '''Transition { currentState: 2, event: CounterEvent.increment, nextState: 3 }''',
+          ];
+          final counterBloc = CounterBloc(
+            onEventCallback: events.add,
+            onTransitionCallback: (transition) {
+              transitions.add(transition.toString());
+            },
+          );
 
-        expectLater(
-          counterBloc.stream,
-          emitsInOrder(expectedStates),
-        ).then((dynamic _) {
-          expect(transitions, expectedTransitions);
-          verify(
-            // ignore: invalid_use_of_protected_member
-            () => observer.onTransition(
-              counterBloc,
-              const Transition<CounterEvent, int>(
-                currentState: 0,
-                event: CounterEvent.increment,
-                nextState: 1,
+          expectLater(
+            counterBloc.stream,
+            emitsInOrder(expectedStates),
+          ).then((dynamic _) {
+            expect(transitions, expectedTransitions);
+            verify(
+              // ignore: invalid_use_of_protected_member
+              () => observer.onTransition(
+                counterBloc,
+                const Transition<CounterEvent, int>(
+                  currentState: 0,
+                  event: CounterEvent.increment,
+                  nextState: 1,
+                ),
               ),
-            ),
-          ).called(1);
-          verify(
-            // ignore: invalid_use_of_protected_member
-            () => observer.onChange(
-              counterBloc,
-              const Change<int>(currentState: 0, nextState: 1),
-            ),
-          ).called(1);
-          verify(
-            // ignore: invalid_use_of_protected_member
-            () => observer.onTransition(
-              counterBloc,
-              const Transition<CounterEvent, int>(
-                currentState: 1,
-                event: CounterEvent.increment,
-                nextState: 2,
+            ).called(1);
+            verify(
+              // ignore: invalid_use_of_protected_member
+              () => observer.onChange(
+                counterBloc,
+                const Change<int>(currentState: 0, nextState: 1),
               ),
-            ),
-          ).called(1);
-          verify(
-            // ignore: invalid_use_of_protected_member
-            () => observer.onChange(
-              counterBloc,
-              const Change<int>(currentState: 1, nextState: 2),
-            ),
-          ).called(1);
-          verify(
-            // ignore: invalid_use_of_protected_member
-            () => observer.onTransition(
-              counterBloc,
-              const Transition<CounterEvent, int>(
-                currentState: 2,
-                event: CounterEvent.increment,
-                nextState: 3,
+            ).called(1);
+            verify(
+              // ignore: invalid_use_of_protected_member
+              () => observer.onTransition(
+                counterBloc,
+                const Transition<CounterEvent, int>(
+                  currentState: 1,
+                  event: CounterEvent.increment,
+                  nextState: 2,
+                ),
               ),
-            ),
-          ).called(1);
-          verify(
-            // ignore: invalid_use_of_protected_member
-            () => observer.onChange(
-              counterBloc,
-              const Change<int>(currentState: 2, nextState: 3),
-            ),
-          ).called(1);
-        });
+            ).called(1);
+            verify(
+              // ignore: invalid_use_of_protected_member
+              () => observer.onChange(
+                counterBloc,
+                const Change<int>(currentState: 1, nextState: 2),
+              ),
+            ).called(1);
+            verify(
+              // ignore: invalid_use_of_protected_member
+              () => observer.onTransition(
+                counterBloc,
+                const Transition<CounterEvent, int>(
+                  currentState: 2,
+                  event: CounterEvent.increment,
+                  nextState: 3,
+                ),
+              ),
+            ).called(1);
+            verify(
+              // ignore: invalid_use_of_protected_member
+              () => observer.onChange(
+                counterBloc,
+                const Change<int>(currentState: 2, nextState: 3),
+              ),
+            ).called(1);
+          });
 
-        counterBloc
-          ..add(CounterEvent.increment)
-          ..add(CounterEvent.increment)
-          ..add(CounterEvent.increment)
-          ..close();
+          counterBloc
+            ..add(CounterEvent.increment)
+            ..add(CounterEvent.increment)
+            ..add(CounterEvent.increment)
+            ..close();
+        }, blocObserver: observer);
       });
 
       test('is a broadcast stream', () {
@@ -402,6 +431,59 @@ void main() {
 
         counterBloc.add(CounterEvent.increment);
       });
+
+      test('maintains correct transition composition', () {
+        final expectedTransitions = <Transition<CounterEvent, int>>[
+          const Transition(
+            currentState: 0,
+            event: CounterEvent.decrement,
+            nextState: -1,
+          ),
+          const Transition(
+            currentState: -1,
+            event: CounterEvent.increment,
+            nextState: 0,
+          ),
+        ];
+
+        final expectedStates = [-1, 0, emitsDone];
+        final transitions = <Transition<CounterEvent, int>>[];
+        final counterBloc = CounterBloc(onTransitionCallback: transitions.add);
+
+        expectLater(
+          counterBloc.stream,
+          emitsInOrder(expectedStates),
+        ).then((dynamic _) {
+          expect(transitions, expectedTransitions);
+        });
+        counterBloc
+          ..add(CounterEvent.decrement)
+          ..add(CounterEvent.increment)
+          ..close();
+      });
+
+      test('events are processed asynchronously', () async {
+        expect(counterBloc.state, 0);
+        expect(events.isEmpty, true);
+        expect(transitions.isEmpty, true);
+
+        counterBloc.add(CounterEvent.increment);
+
+        expect(counterBloc.state, 0);
+        expect(events, [CounterEvent.increment]);
+        expect(transitions.isEmpty, true);
+
+        await tick();
+
+        expect(counterBloc.state, 1);
+        expect(events, [CounterEvent.increment]);
+        expect(
+          transitions,
+          const [
+            '''Transition { currentState: 0, event: CounterEvent.increment, nextState: 1 }'''
+          ],
+        );
+      });
     });
 
     group('Async Bloc', () {
@@ -409,14 +491,13 @@ void main() {
       late MockBlocObserver observer;
 
       setUpAll(() {
-        registerFallbackValue<BlocBase<dynamic>>(FakeBlocBase<dynamic>());
-        registerFallbackValue<StackTrace>(StackTrace.empty);
+        registerFallbackValue(FakeBlocBase<dynamic>());
+        registerFallbackValue(StackTrace.empty);
       });
 
       setUp(() {
         asyncBloc = AsyncBloc();
         observer = MockBlocObserver();
-        Bloc.observer = observer;
       });
 
       test('close does not emit new states over the state stream', () async {
@@ -430,22 +511,22 @@ void main() {
       test(
           'close while events are pending finishes processing pending events '
           'and does not trigger onError', () async {
-        final expectedStates = <AsyncState>[
-          AsyncState.initial().copyWith(isLoading: true),
-          AsyncState.initial().copyWith(isSuccess: true),
-        ];
-        final states = <AsyncState>[];
+        await BlocOverrides.runZoned(() async {
+          final expectedStates = <AsyncState>[
+            AsyncState.initial().copyWith(isLoading: true),
+            AsyncState.initial().copyWith(isSuccess: true),
+          ];
+          final states = <AsyncState>[];
+          final asyncBloc = AsyncBloc()
+            ..stream.listen(states.add)
+            ..add(AsyncEvent());
 
-        asyncBloc
-          // ignore: deprecated_member_use_from_same_package
-          ..listen(states.add)
-          ..add(AsyncEvent());
+          await asyncBloc.close();
 
-        await asyncBloc.close();
-
-        expect(states, expectedStates);
-        // ignore: invalid_use_of_protected_member
-        verifyNever(() => observer.onError(any(), any(), any()));
+          expect(states, expectedStates);
+          // ignore: invalid_use_of_protected_member
+          verifyNever(() => observer.onError(any(), any(), any()));
+        }, blocObserver: observer);
       });
 
       test('state returns correct value initially', () {
@@ -453,103 +534,212 @@ void main() {
       });
 
       test('should map single event to correct state', () {
-        final expectedStates = [
-          AsyncState(isLoading: true, hasError: false, isSuccess: false),
-          AsyncState(isLoading: false, hasError: false, isSuccess: true),
-          emitsDone,
-        ];
+        BlocOverrides.runZoned(() {
+          final expectedStates = [
+            AsyncState(isLoading: true, hasError: false, isSuccess: false),
+            AsyncState(isLoading: false, hasError: false, isSuccess: true),
+            emitsDone,
+          ];
+          final asyncBloc = AsyncBloc();
 
-        expectLater(
-          asyncBloc.stream,
-          emitsInOrder(expectedStates),
-        ).then((dynamic _) {
-          verify(
-            // ignore: invalid_use_of_protected_member
-            () => observer.onTransition(
-              asyncBloc,
-              Transition<AsyncEvent, AsyncState>(
-                currentState: AsyncState(
-                  isLoading: false,
-                  hasError: false,
-                  isSuccess: false,
-                ),
-                event: AsyncEvent(),
-                nextState: AsyncState(
-                  isLoading: true,
-                  hasError: false,
-                  isSuccess: false,
-                ),
-              ),
-            ),
-          ).called(1);
-          verify(
-            // ignore: invalid_use_of_protected_member
-            () => observer.onChange(
-              asyncBloc,
-              Change<AsyncState>(
-                currentState: AsyncState(
-                  isLoading: false,
-                  hasError: false,
-                  isSuccess: false,
-                ),
-                nextState: AsyncState(
-                  isLoading: true,
-                  hasError: false,
-                  isSuccess: false,
+          expectLater(
+            asyncBloc.stream,
+            emitsInOrder(expectedStates),
+          ).then((dynamic _) {
+            verify(
+              // ignore: invalid_use_of_protected_member
+              () => observer.onTransition(
+                asyncBloc,
+                Transition<AsyncEvent, AsyncState>(
+                  currentState: AsyncState(
+                    isLoading: false,
+                    hasError: false,
+                    isSuccess: false,
+                  ),
+                  event: AsyncEvent(),
+                  nextState: AsyncState(
+                    isLoading: true,
+                    hasError: false,
+                    isSuccess: false,
+                  ),
                 ),
               ),
-            ),
-          ).called(1);
-          verify(
-            // ignore: invalid_use_of_protected_member
-            () => observer.onTransition(
-              asyncBloc,
-              Transition<AsyncEvent, AsyncState>(
-                currentState: AsyncState(
-                  isLoading: true,
-                  hasError: false,
-                  isSuccess: false,
-                ),
-                event: AsyncEvent(),
-                nextState: AsyncState(
-                  isLoading: false,
-                  hasError: false,
-                  isSuccess: true,
-                ),
-              ),
-            ),
-          ).called(1);
-          verify(
-            // ignore: invalid_use_of_protected_member
-            () => observer.onChange(
-              asyncBloc,
-              Change<AsyncState>(
-                currentState: AsyncState(
-                  isLoading: true,
-                  hasError: false,
-                  isSuccess: false,
-                ),
-                nextState: AsyncState(
-                  isLoading: false,
-                  hasError: false,
-                  isSuccess: true,
+            ).called(1);
+            verify(
+              // ignore: invalid_use_of_protected_member
+              () => observer.onChange(
+                asyncBloc,
+                Change<AsyncState>(
+                  currentState: AsyncState(
+                    isLoading: false,
+                    hasError: false,
+                    isSuccess: false,
+                  ),
+                  nextState: AsyncState(
+                    isLoading: true,
+                    hasError: false,
+                    isSuccess: false,
+                  ),
                 ),
               ),
-            ),
-          ).called(1);
-          expect(
-            asyncBloc.state,
-            AsyncState(
-              isLoading: false,
-              hasError: false,
-              isSuccess: true,
-            ),
-          );
-        });
+            ).called(1);
+            verify(
+              // ignore: invalid_use_of_protected_member
+              () => observer.onTransition(
+                asyncBloc,
+                Transition<AsyncEvent, AsyncState>(
+                  currentState: AsyncState(
+                    isLoading: true,
+                    hasError: false,
+                    isSuccess: false,
+                  ),
+                  event: AsyncEvent(),
+                  nextState: AsyncState(
+                    isLoading: false,
+                    hasError: false,
+                    isSuccess: true,
+                  ),
+                ),
+              ),
+            ).called(1);
+            verify(
+              // ignore: invalid_use_of_protected_member
+              () => observer.onChange(
+                asyncBloc,
+                Change<AsyncState>(
+                  currentState: AsyncState(
+                    isLoading: true,
+                    hasError: false,
+                    isSuccess: false,
+                  ),
+                  nextState: AsyncState(
+                    isLoading: false,
+                    hasError: false,
+                    isSuccess: true,
+                  ),
+                ),
+              ),
+            ).called(1);
+            expect(
+              asyncBloc.state,
+              AsyncState(
+                isLoading: false,
+                hasError: false,
+                isSuccess: true,
+              ),
+            );
+          });
 
-        asyncBloc
-          ..add(AsyncEvent())
-          ..close();
+          asyncBloc
+            ..add(AsyncEvent())
+            ..close();
+        }, blocObserver: observer);
+      });
+
+      test('should map multiple events to correct states', () {
+        BlocOverrides.runZoned(() {
+          final expectedStates = [
+            AsyncState(isLoading: true, hasError: false, isSuccess: false),
+            AsyncState(isLoading: false, hasError: false, isSuccess: true),
+            AsyncState(isLoading: true, hasError: false, isSuccess: false),
+            AsyncState(isLoading: false, hasError: false, isSuccess: true),
+            emitsDone,
+          ];
+          final asyncBloc = AsyncBloc();
+
+          expectLater(
+            asyncBloc.stream,
+            emitsInOrder(expectedStates),
+          ).then((dynamic _) {
+            verify(
+              // ignore: invalid_use_of_protected_member
+              () => observer.onTransition(
+                asyncBloc,
+                Transition<AsyncEvent, AsyncState>(
+                  currentState: AsyncState(
+                    isLoading: false,
+                    hasError: false,
+                    isSuccess: false,
+                  ),
+                  event: AsyncEvent(),
+                  nextState: AsyncState(
+                    isLoading: true,
+                    hasError: false,
+                    isSuccess: false,
+                  ),
+                ),
+              ),
+            ).called(1);
+            verify(
+              // ignore: invalid_use_of_protected_member
+              () => observer.onChange(
+                asyncBloc,
+                Change<AsyncState>(
+                  currentState: AsyncState(
+                    isLoading: false,
+                    hasError: false,
+                    isSuccess: false,
+                  ),
+                  nextState: AsyncState(
+                    isLoading: true,
+                    hasError: false,
+                    isSuccess: false,
+                  ),
+                ),
+              ),
+            ).called(1);
+            verify(
+              // ignore: invalid_use_of_protected_member
+              () => observer.onTransition(
+                asyncBloc,
+                Transition<AsyncEvent, AsyncState>(
+                  currentState: AsyncState(
+                    isLoading: true,
+                    hasError: false,
+                    isSuccess: false,
+                  ),
+                  event: AsyncEvent(),
+                  nextState: AsyncState(
+                    isLoading: false,
+                    hasError: false,
+                    isSuccess: true,
+                  ),
+                ),
+              ),
+            ).called(2);
+            verify(
+              // ignore: invalid_use_of_protected_member
+              () => observer.onChange(
+                asyncBloc,
+                Change<AsyncState>(
+                  currentState: AsyncState(
+                    isLoading: true,
+                    hasError: false,
+                    isSuccess: false,
+                  ),
+                  nextState: AsyncState(
+                    isLoading: false,
+                    hasError: false,
+                    isSuccess: true,
+                  ),
+                ),
+              ),
+            ).called(2);
+            expect(
+              asyncBloc.state,
+              AsyncState(
+                isLoading: false,
+                hasError: false,
+                isSuccess: true,
+              ),
+            );
+          });
+
+          asyncBloc
+            ..add(AsyncEvent())
+            ..add(AsyncEvent())
+            ..close();
+        }, blocObserver: observer);
       });
 
       test('is a broadcast stream', () {
@@ -582,41 +772,7 @@ void main() {
       });
     });
 
-    group('flatMap', () {
-      test('maintains correct transition composition', () {
-        final expectedTransitions = <Transition<CounterEvent, int>>[
-          const Transition(
-            currentState: 0,
-            event: CounterEvent.decrement,
-            nextState: -1,
-          ),
-          const Transition(
-            currentState: -1,
-            event: CounterEvent.increment,
-            nextState: 0,
-          ),
-        ];
-
-        final expectedStates = [-1, 0, emitsDone];
-        final transitions = <Transition<CounterEvent, int>>[];
-        final flatMapBloc = FlatMapBloc(
-          onTransitionCallback: transitions.add,
-        );
-
-        expectLater(
-          flatMapBloc.stream,
-          emitsInOrder(expectedStates),
-        ).then((dynamic _) {
-          expect(transitions, expectedTransitions);
-        });
-        flatMapBloc
-          ..add(CounterEvent.decrement)
-          ..add(CounterEvent.increment)
-          ..close();
-      });
-    });
-
-    group('mergeBloc', () {
+    group('MergeBloc', () {
       test('maintains correct transition composition', () {
         final expectedTransitions = <Transition<CounterEvent, int>>[
           const Transition(
@@ -720,6 +876,462 @@ void main() {
       });
     });
 
+    group('StreamBloc', () {
+      test('cancels subscriptions correctly', () async {
+        const expectedStates = [0, 1, 2, 3, 4];
+        final states = <int>[];
+        final controller = StreamController<int>.broadcast();
+        final bloc = StreamBloc(controller.stream)
+          ..stream.listen(states.add)
+          ..add(Subscribe());
+
+        await tick();
+
+        controller
+          ..add(0)
+          ..add(1)
+          ..add(2);
+
+        await tick();
+
+        bloc.add(Subscribe());
+
+        await tick();
+
+        controller
+          ..add(3)
+          ..add(4);
+
+        await Future<void>.delayed(const Duration(milliseconds: 300));
+
+        await bloc.close();
+        expect(states, equals(expectedStates));
+      });
+    });
+
+    group('RestartableStreamBloc', () {
+      test('unawaited forEach throws AssertionError', () async {
+        late final Object blocError;
+        await runZonedGuarded(() async {
+          final controller = StreamController<int>.broadcast();
+          final bloc = RestartableStreamBloc(controller.stream)
+            ..add(UnawaitedForEach());
+
+          await tick();
+
+          controller.add(0);
+
+          await tick();
+
+          await Future<void>.delayed(const Duration(milliseconds: 300));
+
+          await bloc.close();
+        }, (error, stackTrace) {
+          blocError = error;
+        });
+
+        expect(
+          blocError,
+          isA<AssertionError>().having(
+            (e) => e.message,
+            'message',
+            contains(
+              '''An event handler completed but left pending subscriptions behind.''',
+            ),
+          ),
+        );
+      });
+
+      test('forEach cancels subscriptions correctly', () async {
+        const expectedStates = [0, 1, 2, 3, 4];
+        final states = <int>[];
+        final controller = StreamController<int>.broadcast();
+        final bloc = RestartableStreamBloc(controller.stream)
+          ..stream.listen(states.add)
+          ..add(ForEach());
+
+        await tick();
+
+        controller
+          ..add(0)
+          ..add(1)
+          ..add(2);
+
+        await tick();
+
+        bloc.add(ForEach());
+
+        await tick();
+
+        controller
+          ..add(3)
+          ..add(4);
+
+        await bloc.close();
+        expect(states, equals(expectedStates));
+      });
+
+      test(
+          'forEach with onError handles errors emitted by stream '
+          'and does not cancel the subscription', () async {
+        const expectedStates = [1, 2, 3, -1, 4, 5, 6];
+        final error = Exception('oops');
+        final states = <int>[];
+        final controller = StreamController<int>.broadcast();
+        final bloc = RestartableStreamBloc(controller.stream)
+          ..stream.listen(states.add)
+          ..add(ForEachOnError());
+
+        await tick();
+
+        controller
+          ..add(1)
+          ..add(2)
+          ..add(3);
+
+        await tick();
+
+        controller
+          ..addError(error)
+          ..add(4)
+          ..add(5)
+          ..add(6);
+
+        await tick();
+
+        expect(states, equals(expectedStates));
+
+        await bloc.close();
+      });
+
+      test('forEach with try/catch handles errors emitted by stream', () async {
+        const expectedStates = [1, 2, 3, -1];
+        final error = Exception('oops');
+        final states = <int>[];
+        final controller = StreamController<int>.broadcast();
+        final bloc = RestartableStreamBloc(controller.stream)
+          ..stream.listen(states.add)
+          ..add(ForEachTryCatch());
+
+        await tick();
+
+        controller
+          ..add(1)
+          ..add(2)
+          ..add(3);
+
+        await tick();
+
+        controller.addError(error);
+
+        await tick();
+
+        expect(states, equals(expectedStates));
+
+        await bloc.close();
+      });
+
+      test(
+          'forEach with catchError '
+          'handles errors emitted by stream', () async {
+        const expectedStates = [1, 2, 3, -1];
+        final error = Exception('oops');
+        final states = <int>[];
+        final controller = StreamController<int>.broadcast();
+        final bloc = RestartableStreamBloc(controller.stream)
+          ..stream.listen(states.add)
+          ..add(ForEachCatchError());
+
+        await tick();
+
+        controller
+          ..add(1)
+          ..add(2)
+          ..add(3);
+
+        await tick();
+
+        controller.addError(error);
+
+        await tick();
+
+        expect(states, equals(expectedStates));
+
+        await bloc.close();
+      });
+
+      test('forEach throws when stream emits error', () async {
+        const expectedStates = [1, 2, 3];
+        final error = Exception('oops');
+        final states = <int>[];
+        late final dynamic uncaughtError;
+
+        await runZonedGuarded(() async {
+          final controller = StreamController<int>.broadcast();
+          final bloc = RestartableStreamBloc(controller.stream)
+            ..stream.listen(states.add)
+            ..add(ForEach());
+
+          await tick();
+
+          controller
+            ..add(1)
+            ..add(2)
+            ..add(3);
+
+          await tick();
+
+          controller
+            ..addError(error)
+            ..add(3)
+            ..add(4)
+            ..add(5);
+
+          await bloc.close();
+        }, (error, stackTrace) => uncaughtError = error);
+        expect(states, equals(expectedStates));
+        expect(uncaughtError, equals(error));
+      });
+
+      test('unawaited onEach throws AssertionError', () async {
+        late final Object blocError;
+        await runZonedGuarded(() async {
+          final controller = StreamController<int>.broadcast();
+          final bloc = RestartableStreamBloc(controller.stream)
+            ..add(UnawaitedOnEach());
+
+          await bloc.close();
+        }, (error, stackTrace) {
+          blocError = error;
+        });
+
+        expect(
+          blocError,
+          isA<AssertionError>().having(
+            (e) => e.message,
+            'message',
+            contains(
+              '''An event handler completed but left pending subscriptions behind.''',
+            ),
+          ),
+        );
+      });
+
+      test(
+          'onEach with onError handles errors emitted by stream '
+          'and does not cancel subscription', () async {
+        const expectedStates = [1, 2, 3, -1, 4, 5, 6];
+        final error = Exception('oops');
+        final states = <int>[];
+        final controller = StreamController<int>.broadcast();
+        final bloc = RestartableStreamBloc(controller.stream)
+          ..stream.listen(states.add)
+          ..add(OnEachOnError());
+
+        await tick();
+
+        controller
+          ..add(1)
+          ..add(2)
+          ..add(3);
+
+        await tick();
+        await Future<void>.delayed(const Duration(milliseconds: 300));
+
+        controller
+          ..addError(error)
+          ..add(4)
+          ..add(5)
+          ..add(6);
+        await tick();
+        await Future<void>.delayed(const Duration(milliseconds: 300));
+
+        expect(states, equals(expectedStates));
+
+        await bloc.close();
+      });
+
+      test('onEach with try/catch handles errors emitted by stream', () async {
+        const expectedStates = [1, 2, 3, -1];
+        final error = Exception('oops');
+        final states = <int>[];
+        final controller = StreamController<int>.broadcast();
+        final bloc = RestartableStreamBloc(controller.stream)
+          ..stream.listen(states.add)
+          ..add(OnEachTryCatch());
+
+        await tick();
+
+        controller
+          ..add(1)
+          ..add(2)
+          ..add(3);
+
+        await tick();
+        await Future<void>.delayed(const Duration(milliseconds: 300));
+
+        controller.addError(error);
+        await tick();
+
+        expect(states, equals(expectedStates));
+
+        await bloc.close();
+      });
+
+      test(
+          'onEach with try/catch handles errors '
+          'emitted by stream and cancels delayed emits', () async {
+        const expectedStates = [-1];
+        final error = Exception('oops');
+        final states = <int>[];
+        final controller = StreamController<int>.broadcast();
+        final bloc = RestartableStreamBloc(controller.stream)
+          ..stream.listen(states.add)
+          ..add(OnEachTryCatchAbort());
+
+        await tick();
+
+        controller
+          ..add(1)
+          ..add(2)
+          ..add(3)
+          ..addError(error);
+
+        await tick();
+        await Future<void>.delayed(const Duration(milliseconds: 300));
+
+        expect(states, equals(expectedStates));
+
+        await bloc.close();
+      });
+
+      test(
+          'onEach with catchError '
+          'handles errors emitted by stream', () async {
+        const expectedStates = [1, 2, 3, -1];
+        final error = Exception('oops');
+        final states = <int>[];
+        final controller = StreamController<int>.broadcast();
+        final bloc = RestartableStreamBloc(controller.stream)
+          ..stream.listen(states.add)
+          ..add(OnEachCatchError());
+
+        await tick();
+
+        controller
+          ..add(1)
+          ..add(2)
+          ..add(3);
+
+        await tick();
+        await Future<void>.delayed(const Duration(milliseconds: 300));
+
+        controller.addError(error);
+        await tick();
+
+        expect(states, equals(expectedStates));
+
+        await bloc.close();
+      });
+
+      test('onEach cancels subscriptions correctly', () async {
+        const expectedStates = [3, 4];
+        final states = <int>[];
+        final controller = StreamController<int>.broadcast();
+        final bloc = RestartableStreamBloc(controller.stream)
+          ..stream.listen(states.add)
+          ..add(OnEach());
+
+        await tick();
+
+        controller
+          ..add(0)
+          ..add(1)
+          ..add(2);
+
+        bloc.add(OnEach());
+        await tick();
+
+        controller
+          ..add(3)
+          ..add(4);
+
+        await Future<void>.delayed(const Duration(milliseconds: 300));
+
+        await bloc.close();
+        expect(states, equals(expectedStates));
+      });
+
+      test('onEach throws when stream emits error', () async {
+        const expectedStates = [1, 2, 3];
+        final error = Exception('oops');
+        final states = <int>[];
+        late final dynamic uncaughtError;
+
+        await runZonedGuarded(() async {
+          final controller = StreamController<int>.broadcast();
+          final bloc = RestartableStreamBloc(controller.stream)
+            ..stream.listen(states.add)
+            ..add(OnEach());
+
+          await tick();
+
+          controller
+            ..add(1)
+            ..add(2)
+            ..add(3);
+
+          await tick();
+          await Future<void>.delayed(const Duration(milliseconds: 300));
+
+          controller
+            ..addError(error)
+            ..add(4)
+            ..add(5)
+            ..add(6);
+
+          await tick();
+          await Future<void>.delayed(const Duration(milliseconds: 300));
+
+          await bloc.close();
+        }, (error, stack) => uncaughtError = error);
+
+        expect(states, equals(expectedStates));
+        expect(uncaughtError, equals(error));
+      });
+    });
+
+    group('UnawaitedBloc', () {
+      test(
+          'throws AssertionError when emit is called '
+          'after the event handler completed normally', () async {
+        late final Object blocError;
+        await runZonedGuarded(() async {
+          final completer = Completer<void>();
+          final bloc = UnawaitedBloc(completer.future)..add(UnawaitedEvent());
+
+          await tick();
+
+          completer.complete();
+
+          await tick();
+
+          await bloc.close();
+        }, (error, stackTrace) => blocError = error);
+
+        expect(
+          blocError,
+          isA<AssertionError>().having(
+            (e) => e.message,
+            'message',
+            contains(
+              'emit was called after an event handler completed normally.',
+            ),
+          ),
+        );
+      });
+    });
+
     group('Exception', () {
       test('does not break stream', () {
         runZonedGuarded(() {
@@ -733,13 +1345,7 @@ void main() {
             ..add(CounterEvent.decrement)
             ..close();
         }, (Object error, StackTrace stackTrace) {
-          expect(
-            (error as BlocUnhandledErrorException).toString(),
-            contains(
-              'Unhandled error Exception: fatal exception occurred '
-              'in Instance of \'CounterExceptionBloc\'.',
-            ),
-          );
+          expect(error.toString(), equals('Exception: fatal exception'));
           expect(stackTrace, isNotNull);
           expect(stackTrace, isNot(StackTrace.empty));
         });
@@ -754,30 +1360,25 @@ void main() {
             onErrorCallback: (Object _, StackTrace __) {},
           )..addError(expectedError, StackTrace.current);
         }, (Object error, StackTrace stackTrace) {
-          expect(
-            (error as BlocUnhandledErrorException).toString(),
-            contains(
-              'Unhandled error Exception: fatal exception occurred '
-              'in Instance of \'OnExceptionBloc\'.',
-            ),
-          );
+          expect(error, equals(expectedError));
           expect(stackTrace, isNotNull);
           expect(stackTrace, isNot(StackTrace.empty));
         });
       });
 
-      test('triggers onError from mapEventToState', () {
+      test('triggers onError from on<E>', () {
+        final exception = Exception('fatal exception');
         runZonedGuarded(() {
-          final exception = Exception('fatal exception');
           Object? expectedError;
           StackTrace? expectedStacktrace;
 
           final onExceptionBloc = OnExceptionBloc(
-              exception: exception,
-              onErrorCallback: (Object error, StackTrace stackTrace) {
-                expectedError = error;
-                expectedStacktrace = stackTrace;
-              });
+            exception: exception,
+            onErrorCallback: (Object error, StackTrace stackTrace) {
+              expectedError = error;
+              expectedStacktrace = stackTrace;
+            },
+          );
 
           expectLater(
             onExceptionBloc.stream,
@@ -792,42 +1393,32 @@ void main() {
             ..add(CounterEvent.increment)
             ..close();
         }, (Object error, StackTrace stackTrace) {
-          expect(
-            (error as BlocUnhandledErrorException).toString(),
-            contains(
-              'Unhandled error Exception: fatal exception occurred '
-              'in Instance of \'OnExceptionBloc\'.',
-            ),
-          );
+          expect(error, equals(exception));
           expect(stackTrace, isNotNull);
           expect(stackTrace, isNot(StackTrace.empty));
         });
       });
 
       test('triggers onError from onEvent', () {
+        final exception = Exception('fatal exception');
         runZonedGuarded(() {
-          final exception = Exception('fatal exception');
-
           OnEventErrorBloc(exception: exception)
             ..add(CounterEvent.increment)
             ..close();
         }, (Object error, StackTrace stackTrace) {
-          expect(
-            (error as BlocUnhandledErrorException).toString(),
-            contains(
-              'Unhandled error Exception: fatal exception occurred '
-              'in Instance of \'OnEventErrorBloc\'.',
-            ),
-          );
+          expect(error, equals(exception));
           expect(stackTrace, isNotNull);
           expect(stackTrace, isNot(StackTrace.empty));
         });
       });
 
-      test('does not trigger onError from add', () {
+      test(
+          'add throws StateError and triggers onError '
+          'when bloc is closed', () {
+        Object? capturedError;
+        StackTrace? capturedStacktrace;
+        var didThrow = false;
         runZonedGuarded(() {
-          Object? capturedError;
-          StackTrace? capturedStacktrace;
           final counterBloc = CounterBloc(
             onErrorCallback: (error, stackTrace) {
               capturedError = error;
@@ -838,17 +1429,27 @@ void main() {
           expectLater(
             counterBloc.stream,
             emitsInOrder(<Matcher>[emitsDone]),
-          ).then((dynamic _) {
-            expect(capturedError, isNull);
-            expect(capturedStacktrace, isNull);
-          });
+          );
 
           counterBloc
             ..close()
             ..add(CounterEvent.increment);
-        }, (Object _, StackTrace __) {
-          fail('should not throw when add is called after bloc is closed');
+        }, (Object error, StackTrace stackTrace) {
+          didThrow = true;
+          expect(error, equals(capturedError));
+          expect(stackTrace, equals(capturedStacktrace));
         });
+
+        expect(didThrow, isTrue);
+        expect(
+          capturedError,
+          isA<StateError>().having(
+            (e) => e.message,
+            'message',
+            'Cannot add new events after calling close',
+          ),
+        );
+        expect(capturedStacktrace, isNotNull);
       });
     });
 
@@ -944,6 +1545,38 @@ void main() {
         expect(counterBloc.state, 42);
         await counterBloc.close();
       });
+
+      test(
+          'throws StateError and triggers onError '
+          'when bloc is closed', () async {
+        Object? capturedError;
+        StackTrace? capturedStacktrace;
+
+        final states = <int>[];
+        final expectedStateError = isA<StateError>().having(
+          (e) => e.message,
+          'message',
+          'Cannot emit new states after calling close',
+        );
+
+        final counterBloc = CounterBloc(
+          onErrorCallback: (error, stackTrace) {
+            capturedError = error;
+            capturedStacktrace = stackTrace;
+          },
+        )..stream.listen(states.add);
+
+        await counterBloc.close();
+
+        expect(counterBloc.isClosed, isTrue);
+        expect(counterBloc.state, equals(0));
+        expect(states, isEmpty);
+        expect(() => counterBloc.emit(1), throwsA(expectedStateError));
+        expect(counterBloc.state, equals(0));
+        expect(states, isEmpty);
+        expect(capturedError, expectedStateError);
+        expect(capturedStacktrace, isNotNull);
+      });
     });
 
     group('close', () {
@@ -958,5 +1591,16 @@ void main() {
         expect(bloc.stream, emitsDone);
       });
     });
+
+    group('isClosed', () {
+      test('returns true after bloc is closed', () async {
+        final bloc = CounterBloc();
+        expect(bloc.isClosed, isFalse);
+        await bloc.close();
+        expect(bloc.isClosed, isTrue);
+      });
+    });
   });
 }
+
+void unawaited(Future<void> future) {}

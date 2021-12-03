@@ -4,15 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_firebase_login/app/app.dart';
 import 'package:flutter_firebase_login/home/home.dart';
-import 'package:flutter_firebase_login/home/widgets/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockAppBloc extends MockBloc<AppEvent, AppState> implements AppBloc {}
-
-class FakeAppEvent extends Fake implements AppEvent {}
-
-class FakeAppState extends Fake implements AppState {}
 
 class MockUser extends Mock implements User {}
 
@@ -21,11 +16,6 @@ void main() {
   group('HomePage', () {
     late AppBloc appBloc;
     late User user;
-
-    setUpAll(() {
-      registerFallbackValue<AppEvent>(FakeAppEvent());
-      registerFallbackValue<AppState>(FakeAppState());
-    });
 
     setUp(() {
       appBloc = MockAppBloc();

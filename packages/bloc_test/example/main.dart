@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:bloc_test/bloc_test.dart';
-import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 
 // Mock Cubit
@@ -13,10 +12,6 @@ class MockCounterBloc extends MockBloc<CounterEvent, int>
     implements CounterBloc {}
 
 void main() {
-  setUpAll(() {
-    registerFallbackValue<CounterEvent>(CounterEvent.increment);
-  });
-
   mainCubit();
   mainBloc();
 }
@@ -75,9 +70,9 @@ void mainBloc() {
     );
 
     blocTest<CounterBloc, int>(
-      'emits [1] when CounterEvent.increment is added',
+      'emits [1] when CounterIncrementPressed is added',
       build: () => CounterBloc(),
-      act: (bloc) => bloc.add(CounterEvent.increment),
+      act: (bloc) => bloc.add(CounterIncrementPressed()),
       expect: () => const <int>[1],
     );
   });
@@ -89,17 +84,12 @@ class CounterCubit extends Cubit<int> {
   void increment() => emit(state + 1);
 }
 
-enum CounterEvent { increment }
+abstract class CounterEvent {}
+
+class CounterIncrementPressed extends CounterEvent {}
 
 class CounterBloc extends Bloc<CounterEvent, int> {
-  CounterBloc() : super(0);
-
-  @override
-  Stream<int> mapEventToState(CounterEvent event) async* {
-    switch (event) {
-      case CounterEvent.increment:
-        yield state + 1;
-        break;
-    }
+  CounterBloc() : super(0) {
+    on<CounterIncrementPressed>((event, emit) => emit(state + 1));
   }
 }

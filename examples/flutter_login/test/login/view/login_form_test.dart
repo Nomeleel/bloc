@@ -1,14 +1,10 @@
 import 'package:bloc_test/bloc_test.dart';
-import 'package:flutter_login/login/login.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_login/login/login.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:formz/formz.dart';
 import 'package:mocktail/mocktail.dart';
-
-class FakeLoginEvent extends Fake implements LoginEvent {}
-
-class FakeLoginState extends Fake implements LoginState {}
 
 class MockLoginBloc extends MockBloc<LoginEvent, LoginState>
     implements LoginBloc {}
@@ -16,11 +12,6 @@ class MockLoginBloc extends MockBloc<LoginEvent, LoginState>
 void main() {
   group('LoginForm', () {
     late LoginBloc loginBloc;
-
-    setUpAll(() {
-      registerFallbackValue<LoginEvent>(FakeLoginEvent());
-      registerFallbackValue<LoginState>(FakeLoginState());
-    });
 
     setUp(() {
       loginBloc = MockLoginBloc();

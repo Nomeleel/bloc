@@ -96,9 +96,15 @@ void main() {
         final states = <int>[];
         final cubit = CounterCubit(shouldReplayCallback: (i) => !i.isEven);
         final subscription = cubit.stream.listen(states.add);
-        cubit..increment()..increment()..increment();
+        cubit
+          ..increment()
+          ..increment()
+          ..increment();
         await Future<void>.delayed(Duration.zero);
-        cubit..undo()..undo()..undo();
+        cubit
+          ..undo()
+          ..undo()
+          ..undo();
         await cubit.close();
         await subscription.cancel();
         expect(states, const <int>[1, 2, 3, 1]);
@@ -113,10 +119,16 @@ void main() {
           shouldReplayCallback: (i) => !i.isEven || replayEvens,
         );
         final subscription = cubit.stream.listen(states.add);
-        cubit..increment()..increment()..increment();
+        cubit
+          ..increment()
+          ..increment()
+          ..increment();
         await Future<void>.delayed(Duration.zero);
         replayEvens = true;
-        cubit..undo()..undo()..undo();
+        cubit
+          ..undo()
+          ..undo()
+          ..undo();
         await cubit.close();
         await subscription.cancel();
         expect(states, const <int>[1, 2, 3, 2, 1, 0]);
@@ -270,7 +282,10 @@ void main() {
           ..undo()
           ..undo();
         replayEvens = true;
-        cubit..redo()..redo()..redo();
+        cubit
+          ..redo()
+          ..redo()
+          ..redo();
         await cubit.close();
         await subscription.cancel();
         expect(states, const <int>[1, 2, 3, 1, 2, 3]);
@@ -463,298 +478,6 @@ void main() {
         final states = <int>[];
         final cubit = CounterCubitMixin();
         final subscription = cubit.stream.listen(states.add);
-        cubit
-          ..increment()
-          ..increment()
-          ..undo()
-          ..decrement()
-          ..redo();
-        await cubit.close();
-        await subscription.cancel();
-        expect(states, const <int>[1, 2, 1, 0]);
-      });
-    });
-  });
-
-  group('ReplayCubit (legacy)', () {
-    group('undo', () {
-      test('does nothing when no state changes have occurred', () async {
-        final states = <int>[];
-        final cubit = CounterCubit();
-        // ignore: deprecated_member_use
-        final subscription = cubit.listen(states.add);
-        cubit.undo();
-        await cubit.close();
-        await subscription.cancel();
-        expect(states, isEmpty);
-      });
-
-      test('does nothing when limit is 0', () async {
-        final states = <int>[];
-        final cubit = CounterCubit(limit: 0);
-        // ignore: deprecated_member_use
-        final subscription = cubit.listen(states.add);
-        cubit
-          ..increment()
-          ..undo();
-        await cubit.close();
-        await subscription.cancel();
-        expect(states, const <int>[1]);
-      });
-
-      test('loses history outside of limit', () async {
-        final states = <int>[];
-        final cubit = CounterCubit(limit: 1);
-        // ignore: deprecated_member_use
-        final subscription = cubit.listen(states.add);
-        cubit
-          ..increment()
-          ..increment()
-          ..undo()
-          ..undo();
-        await cubit.close();
-        await subscription.cancel();
-        expect(states, const <int>[1, 2, 1]);
-      });
-
-      test('reverts to initial state', () async {
-        final states = <int>[];
-        final cubit = CounterCubit();
-        // ignore: deprecated_member_use
-        final subscription = cubit.listen(states.add);
-        cubit
-          ..increment()
-          ..undo();
-        await cubit.close();
-        await subscription.cancel();
-        expect(states, const <int>[1, 0]);
-      });
-
-      test('reverts to previous state with multiple state changes ', () async {
-        final states = <int>[];
-        final cubit = CounterCubit();
-        // ignore: deprecated_member_use
-        final subscription = cubit.listen(states.add);
-        cubit
-          ..increment()
-          ..increment()
-          ..undo();
-        await cubit.close();
-        await subscription.cancel();
-        expect(states, const <int>[1, 2, 1]);
-      });
-    });
-
-    group('redo', () {
-      test('does nothing when no state changes have occurred', () async {
-        final states = <int>[];
-        final cubit = CounterCubit();
-        // ignore: deprecated_member_use
-        final subscription = cubit.listen(states.add);
-        cubit.redo();
-        await cubit.close();
-        await subscription.cancel();
-        expect(states, isEmpty);
-      });
-
-      test('does nothing when no undos have occurred', () async {
-        final states = <int>[];
-        final cubit = CounterCubit();
-        // ignore: deprecated_member_use
-        final subscription = cubit.listen(states.add);
-        cubit
-          ..increment()
-          ..increment()
-          ..redo();
-        await cubit.close();
-        await subscription.cancel();
-        expect(states, const <int>[1, 2]);
-      });
-
-      test('works when one undo has occurred', () async {
-        final states = <int>[];
-        final cubit = CounterCubit();
-        // ignore: deprecated_member_use
-        final subscription = cubit.listen(states.add);
-        cubit
-          ..increment()
-          ..increment()
-          ..undo()
-          ..redo();
-        await cubit.close();
-        await subscription.cancel();
-        expect(states, const <int>[1, 2, 1, 2]);
-      });
-
-      test('does nothing when undos have been exhausted', () async {
-        final states = <int>[];
-        final cubit = CounterCubit();
-        // ignore: deprecated_member_use
-        final subscription = cubit.listen(states.add);
-        cubit
-          ..increment()
-          ..increment()
-          ..undo()
-          ..redo()
-          ..redo();
-        await cubit.close();
-        await subscription.cancel();
-        expect(states, const <int>[1, 2, 1, 2]);
-      });
-
-      test(
-          'does nothing when undos has occurred '
-          'followed by a new state change', () async {
-        final states = <int>[];
-        final cubit = CounterCubit();
-        // ignore: deprecated_member_use
-        final subscription = cubit.listen(states.add);
-        cubit
-          ..increment()
-          ..increment()
-          ..undo()
-          ..decrement()
-          ..redo();
-        await cubit.close();
-        await subscription.cancel();
-        expect(states, const <int>[1, 2, 1, 0]);
-      });
-    });
-  });
-
-  group('ReplayMixin (legacy)', () {
-    group('undo', () {
-      test('does nothing when no state changes have occurred', () async {
-        final states = <int>[];
-        final cubit = CounterCubitMixin();
-        // ignore: deprecated_member_use
-        final subscription = cubit.listen(states.add);
-        cubit.undo();
-        await cubit.close();
-        await subscription.cancel();
-        expect(states, isEmpty);
-      });
-
-      test('does nothing when limit is 0', () async {
-        final states = <int>[];
-        final cubit = CounterCubitMixin(limit: 0);
-        // ignore: deprecated_member_use
-        final subscription = cubit.listen(states.add);
-        cubit
-          ..increment()
-          ..undo();
-        await cubit.close();
-        await subscription.cancel();
-        expect(states, const <int>[1]);
-      });
-
-      test('loses history outside of limit', () async {
-        final states = <int>[];
-        final cubit = CounterCubitMixin(limit: 1);
-        // ignore: deprecated_member_use
-        final subscription = cubit.listen(states.add);
-        cubit
-          ..increment()
-          ..increment()
-          ..undo()
-          ..undo();
-        await cubit.close();
-        await subscription.cancel();
-        expect(states, const <int>[1, 2, 1]);
-      });
-
-      test('reverts to initial state', () async {
-        final states = <int>[];
-        final cubit = CounterCubitMixin();
-        // ignore: deprecated_member_use
-        final subscription = cubit.listen(states.add);
-        cubit
-          ..increment()
-          ..undo();
-        await cubit.close();
-        await subscription.cancel();
-        expect(states, const <int>[1, 0]);
-      });
-
-      test('reverts to previous state with multiple state changes ', () async {
-        final states = <int>[];
-        final cubit = CounterCubitMixin();
-        // ignore: deprecated_member_use
-        final subscription = cubit.listen(states.add);
-        cubit
-          ..increment()
-          ..increment()
-          ..undo();
-        await cubit.close();
-        await subscription.cancel();
-        expect(states, const <int>[1, 2, 1]);
-      });
-    });
-
-    group('redo', () {
-      test('does nothing when no state changes have occurred', () async {
-        final states = <int>[];
-        final cubit = CounterCubitMixin();
-        // ignore: deprecated_member_use
-        final subscription = cubit.listen(states.add);
-        await Future<void>.delayed(Duration.zero, cubit.redo);
-        await cubit.close();
-        await subscription.cancel();
-        expect(states, isEmpty);
-      });
-
-      test('does nothing when no undos have occurred', () async {
-        final states = <int>[];
-        final cubit = CounterCubitMixin();
-        // ignore: deprecated_member_use
-        final subscription = cubit.listen(states.add);
-        cubit
-          ..increment()
-          ..increment()
-          ..redo();
-        await cubit.close();
-        await subscription.cancel();
-        expect(states, const <int>[1, 2]);
-      });
-
-      test('works when one undo has occurred', () async {
-        final states = <int>[];
-        final cubit = CounterCubitMixin();
-        // ignore: deprecated_member_use
-        final subscription = cubit.listen(states.add);
-        cubit
-          ..increment()
-          ..increment()
-          ..undo()
-          ..redo();
-        await cubit.close();
-        await subscription.cancel();
-        expect(states, const <int>[1, 2, 1, 2]);
-      });
-
-      test('does nothing when undos have been exhausted', () async {
-        final states = <int>[];
-        final cubit = CounterCubitMixin();
-        // ignore: deprecated_member_use
-        final subscription = cubit.listen(states.add);
-        cubit
-          ..increment()
-          ..increment()
-          ..undo()
-          ..redo()
-          ..redo();
-        await cubit.close();
-        await subscription.cancel();
-        expect(states, const <int>[1, 2, 1, 2]);
-      });
-
-      test(
-          'does nothing when undos has occurred '
-          'followed by a new state change', () async {
-        final states = <int>[];
-        final cubit = CounterCubitMixin();
-        // ignore: deprecated_member_use
-        final subscription = cubit.listen(states.add);
         cubit
           ..increment()
           ..increment()

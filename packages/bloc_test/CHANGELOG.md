@@ -1,3 +1,54 @@
+# 9.0.1
+
+- chore: upgrade to `bloc v8.0.1`
+
+# 9.0.0
+
+- **BREAKING**: feat: upgrade to `bloc v8.0.0`
+- feat: `MockBloc` no longer implicitly requires `registerFallbackValue` for events and states
+
+# 9.0.0-dev.5
+
+- **BREAKING**: feat: upgrade to `bloc v8.0.0-dev.5`
+
+# 9.0.0-dev.4
+
+- **BREAKING**: feat: upgrade to `bloc v8.0.0-dev.4`
+
+# 9.0.0-dev.3
+
+- **BREAKING**: feat: upgrade to `bloc v8.0.0-dev.3`
+
+# 9.0.0-dev.2
+
+- **BREAKING**: feat: upgrade to `mocktail v0.2.0`
+
+# 9.0.0-dev.1
+
+- **BREAKING**: feat: upgrade to `bloc v8.0.0-dev.2`
+- feat: `MockBloc` no longer implicitly requires `registerFallbackValue` for events and states
+
+# 8.5.0
+
+- feat: prettier diffing when using `blocTest` and `expect` does not match emitted states ([#1783](https://github.com/felangel/bloc/issues/1783))
+
+# 8.4.0
+
+- feat: upgrade to `mocktail ^0.2.0`
+
+# 8.3.0
+
+- feat: accept optional tags in `blocTest`
+  - `tags` is optional and if it is passed, it declares user-defined tags that are applied to the test. These tags can be used to select or skip the test on the command line, or to do bulk test configuration.
+
+# 8.2.0
+
+- feat: upgrade to `bloc ^7.2.0`
+
+# 8.1.0
+
+- feat: add `setUp` and `tearDown` to `blocTest`
+
 # 8.0.2
 
 - fix: revert `package:mocktail` export to reduce conflicts with `package:mockito`

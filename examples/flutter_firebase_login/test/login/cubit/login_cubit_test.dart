@@ -1,9 +1,9 @@
 // ignore_for_file: prefer_const_constructors
 import 'package:authentication_repository/authentication_repository.dart';
 import 'package:bloc_test/bloc_test.dart';
-import 'package:form_inputs/form_inputs.dart';
 import 'package:flutter_firebase_login/login/login.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:form_inputs/form_inputs.dart';
 import 'package:formz/formz.dart';
 import 'package:mocktail/mocktail.dart';
 
@@ -150,15 +150,15 @@ void main() {
       blocTest<LoginCubit, LoginState>(
         'emits [submissionInProgress, submissionFailure] '
         'when logInWithEmailAndPassword fails',
-        build: () {
+        setUp: () {
           when(
             () => authenticationRepository.logInWithEmailAndPassword(
               email: any(named: 'email'),
               password: any(named: 'password'),
             ),
           ).thenThrow(Exception('oops'));
-          return LoginCubit(authenticationRepository);
         },
+        build: () => LoginCubit(authenticationRepository),
         seed: () => LoginState(
           status: FormzStatus.valid,
           email: validEmail,
@@ -204,35 +204,16 @@ void main() {
       blocTest<LoginCubit, LoginState>(
         'emits [submissionInProgress, submissionFailure] '
         'when logInWithGoogle fails',
-        build: () {
+        setUp: () {
           when(
             () => authenticationRepository.logInWithGoogle(),
           ).thenThrow(Exception('oops'));
-          return LoginCubit(authenticationRepository);
         },
+        build: () => LoginCubit(authenticationRepository),
         act: (cubit) => cubit.logInWithGoogle(),
         expect: () => const <LoginState>[
           LoginState(status: FormzStatus.submissionInProgress),
           LoginState(status: FormzStatus.submissionFailure)
-        ],
-      );
-
-      blocTest<LoginCubit, LoginState>(
-        'emits [submissionInProgress, pure] '
-        'when logInWithGoogle is cancelled',
-        build: () {
-          when(() => authenticationRepository.logInWithGoogle()).thenThrow(
-            NoSuchMethodError.withInvocation(
-              null,
-              Invocation.getter(#logInWithGoogle),
-            ),
-          );
-          return LoginCubit(authenticationRepository);
-        },
-        act: (cubit) => cubit.logInWithGoogle(),
-        expect: () => const <LoginState>[
-          LoginState(status: FormzStatus.submissionInProgress),
-          LoginState(status: FormzStatus.pure)
         ],
       );
     });

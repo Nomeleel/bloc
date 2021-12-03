@@ -4,11 +4,8 @@ import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_weather/settings/settings.dart';
-import 'package:flutter_weather/weather/cubit/weather_cubit.dart';
 import 'package:flutter_weather/weather/weather.dart';
 import 'package:mocktail/mocktail.dart';
-
-class FakeWeatherState extends Fake implements WeatherState {}
 
 class MockWeatherCubit extends MockCubit<WeatherState> implements WeatherCubit {
 }
@@ -16,10 +13,6 @@ class MockWeatherCubit extends MockCubit<WeatherState> implements WeatherCubit {
 void main() {
   group('SettingsPage', () {
     late WeatherCubit weatherCubit;
-
-    setUpAll(() {
-      registerFallbackValue<WeatherState>(FakeWeatherState());
-    });
 
     setUp(() {
       weatherCubit = MockWeatherCubit();

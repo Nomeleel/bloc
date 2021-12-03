@@ -2,10 +2,10 @@ import 'package:authentication_repository/authentication_repository.dart';
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:form_inputs/form_inputs.dart';
 import 'package:flutter_firebase_login/login/login.dart';
 import 'package:flutter_firebase_login/sign_up/sign_up.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:form_inputs/form_inputs.dart';
 import 'package:formz/formz.dart';
 import 'package:mocktail/mocktail.dart';
 
@@ -13,8 +13,6 @@ class MockAuthenticationRepository extends Mock
     implements AuthenticationRepository {}
 
 class MockLoginCubit extends MockCubit<LoginState> implements LoginCubit {}
-
-class FakeLoginState extends Fake implements LoginState {}
 
 class MockEmail extends Mock implements Email {}
 
@@ -32,10 +30,6 @@ void main() {
 
   group('LoginForm', () {
     late LoginCubit loginCubit;
-
-    setUpAll(() {
-      registerFallbackValue<LoginState>(FakeLoginState());
-    });
 
     setUp(() {
       loginCubit = MockLoginCubit();

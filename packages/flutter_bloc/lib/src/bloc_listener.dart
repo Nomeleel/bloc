@@ -1,9 +1,7 @@
 import 'dart:async';
 
-import 'package:bloc/bloc.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 
 /// Mixin which allows `MultiBlocListener` to infer the types
@@ -182,7 +180,15 @@ class _BlocListenerBaseState<B extends BlocBase<S>, S>
 
   @override
   Widget buildWithChild(BuildContext context, Widget? child) {
-    if (widget.bloc == null) context.select<B, int>(identityHashCode);
+    assert(
+      child != null,
+      '''${widget.runtimeType} used outside of MultiBlocListener must specify a child''',
+    );
+    if (widget.bloc == null) {
+      // Trigger a rebuild if the bloc reference has changed.
+      // See https://github.com/felangel/bloc/issues/2127.
+      context.select<B, bool>((bloc) => identical(_bloc, bloc));
+    }
     return child!;
   }
 

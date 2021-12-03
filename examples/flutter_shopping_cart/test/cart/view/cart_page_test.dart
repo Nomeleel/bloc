@@ -6,10 +6,6 @@ import 'package:mocktail/mocktail.dart';
 
 import '../../helper.dart';
 
-class FakeCartState extends Fake implements CartState {}
-
-class FakeCartEvent extends Fake implements CartEvent {}
-
 void main() {
   late CartBloc cartBloc;
 
@@ -18,11 +14,6 @@ void main() {
     Item(2, 'item #2'),
     Item(3, 'item #3'),
   ];
-
-  setUpAll(() {
-    registerFallbackValue<CartState>(FakeCartState());
-    registerFallbackValue<CartEvent>(FakeCartEvent());
-  });
 
   setUp(() {
     cartBloc = MockCartBloc();
@@ -124,6 +115,19 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byType(SnackBar), findsOneWidget);
       expect(find.text('Buying not supported yet.'), findsOneWidget);
+    });
+
+    testWidgets('adds CartItemRemoved on long press', (tester) async {
+      when(() => cartBloc.state).thenReturn(
+        CartLoaded(cart: Cart(items: mockItems)),
+      );
+      final mockItemToRemove = mockItems.last;
+      await tester.pumpApp(
+        cartBloc: cartBloc,
+        child: Scaffold(body: CartList()),
+      );
+      await tester.longPress(find.text(mockItemToRemove.name));
+      verify(() => cartBloc.add(CartItemRemoved(mockItemToRemove))).called(1);
     });
   });
 }
